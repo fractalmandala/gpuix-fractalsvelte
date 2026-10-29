@@ -128,6 +128,7 @@ export type WindowNative = Partial<
 	// napi's `Buffer` parameters take any Uint8Array, and the wasm build declares Uint8Array.
 	setImage?(elementId: number, bytes: Uint8Array): void;
 	setImagePixels?(elementId: number, width: number, height: number, pixels: Uint8Array): void;
+	registerFont?(data: Uint8Array): void;
 } & Partial<
 	Pick<
 		GpuixRenderer,

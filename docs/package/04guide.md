@@ -135,6 +135,11 @@ drops into a scaffolded project as-is (in a clone, it is `npm run demo:desktop`)
   straight-alpha RGBA and scales it into the element's box, so upload at 2× for a sharp image on
   retina screens. The image is dropped when the element is destroyed or its `src` changes. Called
   from `{@attach}`, both wait for the element to exist.
+- `register_font(bytes)` makes the faces in a TrueType or OpenType file (or collection) usable by
+  `font-family`, under the family names the file declares. Call it before the first layout that
+  names the family: text already laid out keeps the fallback it got. It throws on a file GPUI
+  cannot read (a `.woff2` is one) and does nothing in a browser. One family name per declaration —
+  a CSS stack like `"Inter", sans-serif` matches nothing and silently falls back.
 
 Elements also take `onfiledrop`, for files dropped from the system's file manager. `e.paths` are
 absolute, and `e.x` / `e.y` is the drop point. `<virtual-list>` doesn't get it, so wrap a list in a

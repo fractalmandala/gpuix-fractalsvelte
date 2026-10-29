@@ -1,7 +1,6 @@
 # create-gpuix-fractalsvelte
 
-Scaffolds a [gpuix-fractalsvelte](https://github.com/fractalmandala/gpuix-fractalsvelte) app: Svelte components
-rendered into a native, GPU-accelerated desktop window through GPUI.
+Scaffolds a [gpuix-fractalsvelte](https://github.com/fractalmandala/gpuix-fractalsvelte) app with fractalstyle design system and tokens build in.
 
 ```bash
 npm create gpuix-fractalsvelte@latest my-app

@@ -1,9 +1,7 @@
 # Devlog
 
-Log of all tasks and development activity in "gpuix-fractalsvelte enhancement project".
-See [CLAUDE](./CLAUDE.md) for "gpuix-fractalsvelte enhancement project"
+Log of all tasks and development activity.
 
-[x] Renamed gpuix-svelte to gpuix-fractalsvelte
 [x] Scaffolded demo app via gpuix-fractalsvelte - `fsgpui/examples/gpuix-fs-appone`
 [x] Moving gpuix-fractalsvelte to regular Svelte 5 - initiation done
 [x] Preparing CSS Vars & dynamic theming support
@@ -11,11 +9,12 @@ See [CLAUDE](./CLAUDE.md) for "gpuix-fractalsvelte enhancement project"
 [ ] Applying/enabling fractalstyler
 [x] Compound class selector matching in gpuix-dom
 [x] Porting selector matching into gpui-dom
-[ ] Custom header with native traffic lights
+[x] Custom header with native traffic lights
 [ ] Reconcile fsgpui / gpuix-fractalsvelte sources of truth
 [ ] Decide gpui-svelte synergy vs competing runtime path
 [x] Calibrating gpuix-fractalsvelte (pre-clean)
 [x] Revert to custom renderer API
+[ ] Component library: gpuix-fractalsvelte-ui
 
 ## Devlogs
 
@@ -32,6 +31,8 @@ Devlog documents capture tasks, task assignments, goals, goal definitions, and t
 9. [gpui-svelte Synergies](./docs/devlogs/gpui-svelte-synergies.md)
 10. [Calibrating Gpuix-Fractalsvelte](./docs/devlogs/calibrating-gpuix-fractalsvelte.md)
 11. [Regular Svelte vs the Custom Renderer](./docs/devlogs/regular-svelte-vs-custom-renderer.md)
+12. [Automatic Fractalstyler Integration](./docs/devlogs/automatic-fractalstyler.md)
+13. [Component Library](./docs/devlogs/component-library.md)
 
 ## Applying Fractalstyler
 

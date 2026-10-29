@@ -1,7 +1,7 @@
 {
-	"name": "create-gpuix-fractalsvelte",
+	"name": "@fractaldesign/create-gpuix-fractalsvelte",
 	"version": "0.2.0",
-	"description": "Scaffold a gpuix-fractalsvelte app: Svelte components in a native GPUI window",
+	"description": "Scaffold a gpuix-fractalsvelte app - Fractalstyler design system and tokens built in.",
 	"type": "module",
 	"license": "MIT",
 	"author": "Amritanshu Pandey",

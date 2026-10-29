@@ -4,7 +4,23 @@ This is a gpuix-fractalsvelte app: Svelte 5 components rendered
 into a native desktop window by GPUI, the GPU-accelerated UI framework behind the Zed editor. It runs
 on Node.js >= 24 or Bun >= 1.4.
 
-Gpuix-Fractalsvelte is a personal fork of [GPUIX Svelte](https://github.com/khromov/gpuix-svelte), for local development and experimentation. 
+Gpuix-Fractalsvelte is a personal fork of [GPUIX Svelte](https://github.com/khromov/gpuix-svelte), for local development and experimentation. The objective is to find enhancements to GPUIX Svelte for CSS and Svelte components, and ideally to be able to run it using regular Svelte rather than the fixed, vendored copy in `vendor/svelte-5.57.2-694f791.gz`.
+
+> Context: `packages/fsgpui/inichat.md`
+
+## Roadmap
+[x] Create example gpuix-fractalsvelte app - `packages/fsgpui/examples/gpuix-fs-appone`
+[ ] Incorporate fractalstyler for styling.
+[ ] Integrate within fsgpui and fractalai.
+
+## Docs
+
+- [Overview](./../../../docs/gpuix-fractalsvelte/01overview.md): what the package is, setup, how it differs from Svelte on the web, TypeScript config
+- [Styling](./../../../docs/gpuix-fractalsvelte/02styling.md): every CSS property and value GPUI accepts, what is dropped, theming with var() and set_css_vars
+- [Components](./../../../docs/gpuix-fractalsvelte/03components.md): Scroller (scrollbars, virtual lists), Portal (modals, menus, toasts), Tooltip, Popover and the native <anchored> they build on
+- [Guide](./../../../docs/gpuix-fractalsvelte/04guide.md): forms and inputs, keyboard shortcuts and focus, window and desktop helpers, state that survives hot reload
+- [Testing](./../../../docs/gpuix-fractalsvelte/06testing.md): headless tests through gpuix-svelte/test: mount, click, type, read back, screenshot; gpuix-svelte/automation drives a running window
+- [Shipping](./../../../docs/gpuix-fractalsvelte/05shipping.md): standalone binaries with Bun, macOS signing, running in a browser on WebGPU
 
 ## Commands
 

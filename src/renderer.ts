@@ -80,6 +80,11 @@ const PROP_ALIASES = new Map([
 /** The live GpuixRenderer (or TestGpuixRenderer). */
 let native: NativeSink | null = null;
 
+// GPUI's getElementBounds reports the content origin with the padding box's size; the last emitted
+// insets per element turn that back into the painted border box: [pad l, pad t, border l, t, r, b].
+let insets = new Map<number, number[]>();
+const num = (v: unknown) => (typeof v === 'number' ? v : 0);
+
 /** Queued mutation tuples, flushed as one `applyBatch` call. */
 let queue: Mutation[] = [];
 
@@ -311,6 +316,15 @@ function apply_style(el: ShadowNode) {
 			if (svg.nativeId !== null && descends(svg, el)) apply_style(svg);
 		}
 	}
+
+	const side = (long: string, short: string) => num(style[long] ?? style[short]);
+	const box = [
+		side('paddingLeft', 'padding'), side('paddingTop', 'padding'),
+		side('borderLeftWidth', 'borderWidth'), side('borderTopWidth', 'borderWidth'),
+		side('borderRightWidth', 'borderWidth'), side('borderBottomWidth', 'borderWidth')
+	];
+	if (box.some((v) => v !== 0)) insets.set(el.nativeId, box);
+	else insets.delete(el.nativeId);
 
 	emit(['setStyle', el.nativeId, style]);
 }
@@ -626,6 +640,8 @@ export function set_css_vars(vars: Record<string, string | number | null>) {
 
 export function set_native(instance: NativeSink) {
 	native = instance;
+	insets = new Map();
+	corrected = null;
 	queue = [];
 	by_id = new Map();
 	pending_destroy = new Set();
@@ -686,7 +702,44 @@ export function on_window_key(type: WindowKeyType, handler: (event: GpuixEvent) 
 export const on_selection_change = (handler: (event: GpuixEvent) => void) => on_window_event('selectionChange', handler);
 
 /** For components that need GPUI's answers back, e.g. scroll offsets and painted bounds. */
-export const get_native = (): Native | null => native as Native | null;
+type Bounds = { x: number; y: number; width: number; height: number };
+
+function fix_bounds(id: number, b: Bounds | null): Bounds | null {
+	const box = b && insets.get(id);
+	if (!b || !box) return b;
+	const [pl, pt, bl, bt, br, bb] = box;
+	return { x: b.x - pl - bl, y: b.y - pt - bt, width: b.width + bl + br, height: b.height + bt + bb };
+}
+
+type TreeJson = { id: number; bounds?: Bounds; children?: TreeJson[] };
+function fix_tree(node: TreeJson) {
+	if (node.bounds) node.bounds = fix_bounds(node.id, node.bounds) ?? node.bounds;
+	node.children?.forEach(fix_tree);
+}
+
+let corrected: Native | null = null;
+
+/** The live native renderer, with element bounds corrected to the painted border box. */
+export const get_native = (): Native | null => {
+	if (!native) return null;
+	corrected ??= new Proxy(native as Native, {
+		get(target, key) {
+			const t = target as unknown as Record<string | symbol, unknown>;
+			if (key === 'getElementBounds') return (id: number) => fix_bounds(id, (target as Native).getElementBounds(id));
+			if (key === 'getAutomationTree')
+				return () => {
+					const json = (t.getAutomationTree as () => string | null).call(target);
+					if (!json || insets.size === 0) return json;
+					const tree = JSON.parse(json) as TreeJson | null;
+					if (tree) fix_tree(tree);
+					return JSON.stringify(tree);
+				};
+			const v = t[key];
+			return typeof v === 'function' ? v.bind(target) : v;
+		}
+	}) as Native;
+	return corrected;
+};
 
 export const node_of = (id: number | null | undefined): ShadowNode | null => (id == null ? null : (by_id.get(id) ?? null));
 

@@ -1,0 +1,9 @@
+# instance of /wiki/types/project.type.yaml. Hand-written fields only (D010, D011).
+# Lines marked 👾? are agent guesses for Amrit to confirm.
+name: gpuix-fractalsvelte
+description: personal fork of khromov/gpuix-svelte that auto-loads fractalstyler tokens and classes
+status: wip
+category: [svelte, gpui]
+stack: [svelte, typescript, rust, gpui, bun]   # 👾?
+tool: [ide, explorer]
+gitUrl: https://github.com/fractalmandala/gpuix-fractalsvelte

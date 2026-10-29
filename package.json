@@ -1,13 +1,14 @@
 {
 	"name": "gpuix-fractalsvelte",
-	"version": "0.2.0",
-	"description": "Svelte custom renderer for GPUI (Zed's GPU-accelerated UI framework), fork of gpuix-svelte, via @gpuix/native",
+	"version": "0.2.1",
+	"description": "Personal experimental build of Stanislav Khromov's gpuix-svelte",
 	"type": "module",
 	"license": "MIT",
 	"author": "Stanislav Khromov",
 	"main": "src/index.ts",
 	"bin": {
-		"gpuix-fractalsvelte": "bin/gpuix-fractalsvelte.js"
+		"gpuix-fractalsvelte": "bin/gpuix-fractalsvelte.js",
+		"gpuix-fractalsvelte-styles": "bin/gpuix-fractalsvelte-styles.js"
 	},
 	"exports": {
 		".": {
@@ -23,7 +24,8 @@
 		"./html": {
 			"types": "./src/html.d.ts"
 		},
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./fractalstyler": "./src/fractalstyler/report.ts"
 	},
 	"files": [
 		"src",
@@ -35,7 +37,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/khromov/gpuix-fractalsvelte"
+		"url": "https://github.com/fractalmandala/gpuix-fractalsvelte"
 	},
 	"keywords": [
 		"svelte",
@@ -48,9 +50,12 @@
 	],
 	"scripts": {
 		"typecheck": "tsc --noEmit && svelte-check --tsconfig ./tsconfig.json --diagnostic-sources js,svelte --fail-on-warnings --output human",
+		"styles:report": "node bin/gpuix-fractalsvelte-styles.js",
+		"test:fractalstyler": "node bin/gpuix-fractalsvelte.js test/fractalstyler.ts",
+		"bun:test:fractalstyler": "node bin/gpuix-fractalsvelte.js --bun test/fractalstyler.ts",
 		"lint": "eslint .",
 		"check:svelte": "node --use-env-proxy scripts/svelte-mcp.ts",
-		"test": "npm run typecheck && npm run test:reorder && npm run test:smoke && npm run test:autocommit && npm run test:style && npm run test:teardown && npm run test:lifecycle && npm run test:compile && npm run test:css && npm run test:module && npm run test:vars && npm run test:scroller && npm run test:hitbox && npm run test:auxclick && npm run test:window-keys && npm run test:portal && npm run test:host && npm run test:overlay && npm run test:window && npm run test:helpers && npm run test:search && npm run test:tooltip && npm run test:automation",
+		"test": "npm run typecheck && npm run test:reorder && npm run test:smoke && npm run test:autocommit && npm run test:style && npm run test:teardown && npm run test:lifecycle && npm run test:compile && npm run test:css && npm run test:module && npm run test:fractalstyler && npm run test:vars && npm run test:scroller && npm run test:hitbox && npm run test:auxclick && npm run test:window-keys && npm run test:portal && npm run test:host && npm run test:overlay && npm run test:window && npm run test:helpers && npm run test:search && npm run test:tooltip && npm run test:automation",
 		"test:vars": "node bin/gpuix-fractalsvelte.js test/vars.ts",
 		"test:scroller": "node bin/gpuix-fractalsvelte.js test/scroller.ts",
 		"test:hitbox": "node bin/gpuix-fractalsvelte.js test/hitbox.ts",
@@ -83,7 +88,7 @@
 		"bun:typecheck": "npm run typecheck",
 		"bun:consume": "node scripts/consume.ts --bun",
 		"bun:consume:open": "node scripts/consume.ts --bun --open",
-		"bun:test": "npm run bun:typecheck && npm run bun:test:reorder && npm run bun:test:smoke && npm run bun:test:autocommit && npm run bun:test:style && npm run bun:test:teardown && npm run bun:test:lifecycle && npm run bun:test:compile && npm run bun:test:css && npm run bun:test:module && npm run bun:test:vars && npm run bun:test:scroller && npm run bun:test:hitbox && npm run bun:test:auxclick && npm run bun:test:window-keys && npm run bun:test:portal && npm run bun:test:host && npm run bun:test:overlay && npm run bun:test:window && npm run bun:test:helpers && npm run bun:test:search && npm run bun:test:tooltip && npm run bun:test:automation",
+		"bun:test": "npm run bun:typecheck && npm run bun:test:reorder && npm run bun:test:smoke && npm run bun:test:autocommit && npm run bun:test:style && npm run bun:test:teardown && npm run bun:test:lifecycle && npm run bun:test:compile && npm run bun:test:css && npm run bun:test:module && npm run bun:test:fractalstyler && npm run bun:test:vars && npm run bun:test:scroller && npm run bun:test:hitbox && npm run bun:test:auxclick && npm run bun:test:window-keys && npm run bun:test:portal && npm run bun:test:host && npm run bun:test:overlay && npm run bun:test:window && npm run bun:test:helpers && npm run bun:test:search && npm run bun:test:tooltip && npm run bun:test:automation",
 		"bun:test:vars": "node bin/gpuix-fractalsvelte.js --bun test/vars.ts",
 		"bun:test:scroller": "node bin/gpuix-fractalsvelte.js --bun test/scroller.ts",
 		"bun:test:hitbox": "node bin/gpuix-fractalsvelte.js --bun test/hitbox.ts",
@@ -110,9 +115,11 @@
 		"bun:test:coverage": "node bin/gpuix-fractalsvelte.js --bun test/coverage.ts"
 	},
 	"dependencies": {
-		"@gpuix/native": ">=0.10.0 <0.11.0",
+		"@gpuix/native": ">=0.11.0 <0.12.0",
 		"acorn": "^8.19.0",
-		"svelte": "file:vendor/svelte-5.57.2-694f791.tgz"
+		"svelte": "file:vendor/svelte-5.57.2-694f791.tgz",
+		"@fractaldesign/fractalstyler": "file:/Users/amrit/fractaldesign/packages/fractalstyler",
+		"sass": "^1.106.1"
 	},
 	"bundleDependencies": [
 		"svelte"
@@ -132,5 +139,8 @@
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org/",
 		"access": "public"
+	},
+	"allowScripts": {
+		"@parcel/watcher": true
 	}
 }

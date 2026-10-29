@@ -22,6 +22,7 @@ export {
 	set_css_vars
 } from './renderer.ts';
 export { parse_css_text, build_style } from './style.ts';
+export { fractalstyler_mode, set_mode_value as set_fractalstyler_mode, type FractalstylerMode } from './fractalstyler/mode.ts';
 export { to_gpui_event, GPUI_EVENTS } from './events.ts';
 
 export {
@@ -41,6 +42,7 @@ export {
 	scroll_into_view,
 	set_image,
 	set_image_pixels,
+	register_font,
 	set_debug_overlay,
 	cycle_debug_overlay,
 	debug_overlay,

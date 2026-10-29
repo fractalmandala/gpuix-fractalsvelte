@@ -94,6 +94,16 @@ export function set_image_pixels(node: NodeRef, width: number, height: number, r
 	with_native_id(node, (id) => win()?.setImagePixels?.(id, width, height, rgba));
 }
 
+/**
+ * A TrueType or OpenType file (or collection), usable by `font-family` under the family names it
+ * declares. Call it before the first layout that names the family: text already laid out against a
+ * fallback keeps that fallback. Throws on a file GPUI cannot read (a `.woff2` is one), and does
+ * nothing in a browser, where the wasm build has no font set to add to.
+ *
+ * One family name, not a CSS stack: `"Inter", sans-serif` matches nothing and silently falls back.
+ */
+export const register_font = (bytes: Uint8Array) => win()?.registerFont?.(bytes);
+
 const OVERLAY_MODES = new Set<string>(['hidden', 'minimal', 'full']);
 const warned_overlays = new Set<string>();
 

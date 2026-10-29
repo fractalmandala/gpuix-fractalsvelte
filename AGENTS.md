@@ -5,6 +5,11 @@ gpuix-fractalsvelte is coupled with fsgpui, both projects together driving integ
 > In a broad sense the objective we are pursuing:
 > Incorporating `fractalstyler` into gpuix-fractalsvelte.
 
+> What does "incorporating" mean?
+> It means that the gpuix-fractalsvelte package must be edited such, that when other projects use `npm create gpuix-fractalsvelte` and install it, fractalstyler classes and tokens recognition must be activated in their projects.
+> They should not need to set up cssvars or other functions/tooling themselves.
+> There is no difference between gpuix-svelte and gpuix-fractalsvelte otherwise!
+
 **Always See `DEVLOG.md` for details.**
 
 ## Rules

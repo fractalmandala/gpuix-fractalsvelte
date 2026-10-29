@@ -7,7 +7,6 @@ This is a **very experimental** build that I break often and use to learn and pl
 A complete roundtrip experiment was conducted by using the current version of Svelte 5, instead of the unreleased custom renderer API. Was able to make it work, but it's actually not worth it, the costs outweighing any benefit. Still, the full log of this can be traced in the `devlogs` folder, particularly:
 [regular svelte vs custom rendered](docs/devlogs/regular-svelte-vs-custom-renderer.md)
 
-
 ## Docs
 
 - [Overview](docs/package/01overview.md): what the package is, setup, how it differs from Svelte on the web, TypeScript config
@@ -241,27 +240,6 @@ Event handlers take a `GpuixEvent` and `{@attach}` gets a `ShadowNode`. Both are
 - Handlers take `GpuixEvent` and `{@attach}` gets a `ShadowNode`, both importable as types from
   `gpuix-fractalsvelte`.
 
-## Examples
-
-Every example under [`examples/`](examples/) is an ordinary app: its `.svelte` components and a
-`main.ts` that calls `render_hot`, so any of them drops into a project made with
-`npm create gpuix-fractalsvelte`. The scripts below run them in a clone of the repository (`bun install`,
-then the command):
-
-| | |
-|---|---|
-| `npm run demo:counter` | The counter, hot-reloading on save |
-| `npm run demo:tictactoe` | Tic-tac-toe with score tracking |
-| `npm run demo:hn` | Hacker News reader: live network data in a scrolling list |
-| `npm run demo:glass` | A translucent control center over macOS vibrancy (`demo:glass-ffi`: real Liquid Glass via FFI, macOS 26+) |
-| `npm run demo:styling` | Which CSS reaches GPUI and which is dropped, side by side |
-| `npm run demo:desktop` | Window controls, file picker and drops, live image pixels, selection, focus, accessibility |
-| `npm run demo:web` | Tic-tac-toe in a browser on GPUI's WebAssembly build (Bun) |
-| `npm run tutorial` | A 12-step interactive guide to the renderer, itself a gpuix-svelte app |
-
-Each of these, apart from `demo:web` (which always runs on Bun), has a Bun twin under a `bun:`
-prefix, such as `npm run bun:demo:counter`.
-
 ## About the Svelte version
 
 Custom renderers live on an open Svelte pull request that moves on its own schedule. So each
@@ -302,7 +280,7 @@ batch, which Rust applies before the next paint.
 Around that sit a `.svelte` loader for Node and one for Bun, which compile components with the
 renderer baked in and turn `<style>` blocks into class rules, a translator from CSS to GPUI
 styles that expands shorthands and drops what GPUI would reject, a ~125 fps frame loop, and
-in-process hot reload. The full design notes are in [CLAUDE.md](CLAUDE.md).
+in-process hot reload.
 
 ## Commands
 
@@ -431,34 +409,6 @@ is an alias, `demo` and `consume` take `--bun` for their twins, and the remainin
 (`lint`, `check:svelte`, `docs`, `vendor`, `parity`, `pack`, `publish:npm`) has none. Repo-local
 scripts that need no loader run on plain `node`, which strips their types itself.
 
-### Driving a running app
-
-`docs/testing.md` covers the API. `gpuix-fractalsvelte/automation` (`src/automation.ts`) re-exports
-`@gpuix/native/automation`'s `App` / `Locator` / `AutomationError` rather than porting them.
-`launch({ entry, bun?, args?, cwd?, env? })` spawns `process.execPath bin/gpuix-fractalsvelte.js entry`
-with `GPUIX_AUTOMATION=1` and stderr inherited (upstream's own `launch` pipes stderr and never
-drains it, and its `close()` SIGTERMs), connects with upstream's `connectStdio`, and its `close()`
-ends the app's stdin. `test_app()` is the same `App` over `TestGpuixRenderer`, through
-`headless_renderer()`, upstream's `TestAutomationRenderer` written with test.ts's simulate → drain
-→ settle discipline; its reads settle first, so `waitFor` sees a timer's update.
-
-`GPUIX_AUTOMATION=1` (`0` or empty is off) is deliberately explicit, not upstream
-`createNativeRenderer`'s stdin-is-not-a-TTY sniffing: stdin is not a TTY under CI, `nohup`, an
-agent's shell or `demo-all.ts`'s four children, and the env var is what lets stdin ending mean
-"exit". Under it `render()` rebinds `console.log`/`info`/`debug` to stderr before creating the
-window (stdout is the wire, and a write without a trailing newline would swallow the next frame)
-and imports `src/automation-server.ts` through a computed specifier, so neither the web bundle nor
-the normal app path loads it, and a compiled binary cannot serve. The server is started where the
-window is created, so `render_hot` remounts reuse it. It owns its stdio loop (upstream's
-`createSseDecoder` + `handleAutomationRequest`) to answer an unparseable request that has an id
-with a `Protocol` error (upstream drops it, and the driver waits forever) and to answer what is in
-flight before stdin's end exits the process. Upstream's `liveRendererAsTest` ticks synchronously
-after each input, which is not enough here — the napi callback carrying the event runs on a later
-loop turn, so a `getTree` right after a `click` could miss a just-shown `{#if}` node. So the
-server hides `tick` from it and wraps the backend (`frame_synced`): requests run one at a time and
-every input replies only after two of the frame loop's own ticks (`next_frame()` in `render.ts`);
-reads and `screenshot` do not wait.
-
 ### Measuring frame cost
 
 Scroll lag here is native per-frame layout, not JS, so measure before reasoning. Both
@@ -472,34 +422,6 @@ package.json). Substrate's `scripts/frame-cost.ts` (`bun run frames` in
 `../substrate-gpuix-fractalsvelte`) is the worked example over a real window: it boots the app against a
 `VACUUM INTO` copy of its data and prints idle and while-scrolling draw times per route; its
 AGENTS.md keeps the baselines.
-
-## Shipping
-
-### Standalone binary
-
-User-facing steps, including signing and notarization (`CODESIGN_IDENTITY`, `NOTARY_PROFILE`), are
-in `docs/shipping.md`. `scripts/compile.ts` is `Bun.build({ compile })` over
-`examples/tic-tac-toe/standalone.ts`, a static-`render()` entry — `render_hot` re-imports from disk
-and can't live in a binary, so `main.ts` stays the dev entry. `Bun.build` never sees the
-`Bun.plugin` registration from `bunfig.toml`, so the script wires `src/plugin.ts`'s exported hooks
-in itself:
-
-- `load_svelte` / `load_module` compile components, and the script counts the components that
-  went through them, because without the plugin a `.svelte` import silently becomes a file asset
-  while the build still succeeds.
-- `resolve_svelte(conditions)` pins `svelte` to the bundled copy under the build's own conditions
-  (`custom-renderer` + `production` here, `custom-renderer` + `browser` in `scripts/web.ts`).
-  `production` only takes effect together with the `process.env.NODE_ENV` define, because Bun
-  implies `development` otherwise and esm-env lists it first.
-- `resolve_native_cjs` points `@gpuix/native` at its `index.cjs`: the ESM loader finds the `.node`
-  through `createRequire(import.meta.url)`, which `Bun.build` cannot trace, and without the CJS
-  entry the binary ships without the addon and dies at launch — the script's size floor catches
-  that. Bun embeds only the host's prebuild, so a binary is built on the OS it targets.
-
-`autoloadBunfig` and `autoloadDotenv` are off, so a `bunfig.toml` or `.env` beside the binary can't
-reconfigure it. `GPUIX_FRACTALSVELTE_RENDERER` is a build-time variable on this path. The `.app`'s icon is
-`examples/tic-tac-toe/icon.png`, rasterized at 1024 px from the `icon.svg` beside it; `--app` cuts it
-into an `.icns` with `sips` + `iconutil`.
 
 ### Rendering to the web
 
@@ -767,251 +689,3 @@ on resize.
 GPUI keys listeners camelCase (`mouseEnter`). `GPUI_EVENTS` is a hand-kept copy of GPUI's event
 list, lowercased into the lookup map; `npm run parity` diffs it against upstream's `EVENT_PROPS`.
 Unknown events are dropped silently.
-
-### Shipped components
-
-`src/components/` ships `.svelte` files as-is; the consumer's loader compiles them, and their
-`import ... from 'gpuix-fractalsvelte'` resolves through the package's own `exports` from anywhere.
-`docs/components.md` documents their props and the native `<anchored>`.
-
-- **`Scroller`** is the scroll column with a drawn thumb (the tutorial, the styling playground
-  and Substrate all use it). GPUI paints no scrollbar and captures no pointer, so it measures
-  `getElementBounds`/`getScrollOffset` on a timer and drags on a panel-sized overlay; the thumb
-  restyle after a wheel event is throttled to one per 50 ms because each one is a full native
-  frame. A plain scroll container lays out and paints every child every frame, so `virtual` swaps
-  in GPUI's `<virtual-list>` (each direct child a row, which needs `width: 100%`; `follow` →
-  `followTail`). There the thumb works in rows: the viewport from `getListScrollTop`, the row
-  height a running mean of `visibleRange` reports seeded with `estimate`, drag via `scrollToItem`.
-  Its colours are `var(--scroller-thumb, …)` / `var(--scroller-thumb-hover, …)`.
-- **`Portal`** is a window-sized `position: absolute; pointer-events: none` wrapper carrying the
-  renderer's `portal` attribute: the shadow node stays exactly where Svelte put it (so Svelte's
-  teardown walk, anchors and `{#if}` blocks are untouched) and only the **native** node hangs off
-  the root (whose default `position: relative` makes `inset: 0` the window) — appended after the
-  subtree it sits in has attached (`pending_portals`), so it paints last, and later portals over
-  earlier ones. `first_native_after` skips portal nodes, since they are not in their shadow
-  parent's native child list, and `commit()` destroys any portal that is no longer `live`, because
-  its ancestor's `destroyElement` never reaches it.
-- **`Tooltip`** and **`Popover`** hang a native `<anchored>` layer from a 0×0 dot on the trigger's
-  edge, with `align="start"` and the `anchor` corner named explicitly, because native 0.10's
-  `align: center` centres the content-sized layer box and then anchors its centre again, landing
-  half a layer off (`test:tooltip` asserts the quirk, so it fails once upstream fixes it). The
-  layer carries `background-color: #00000001`, or native paints `#1a1a1a` behind it. `Tooltip`
-  tracks hover per source (wrapper, spread trigger handlers, tip) because a pointer jumping onto the
-  tip gets the tip's `mouseEnter` before the trigger's `mouseLeave`. `Popover`'s `mouseDownOutside`
-  sits on the panel (`<anchored>` only hears `click`, `mouseEnter`, `mouseLeave` and `fileDrop`).
-  Both forward a `style` prop to the tip or panel: `var()` resolves from one global map and a
-  parent's scoped rules cannot reach in, so inline style is the only per-instance hook.
-
-### Regenerating the styling reference
-
-The two `<details>` lists in `docs/styling.md` are transcribed from the native side, so redo them
-whenever `@gpuix/native` moves. The npm package ships no Rust; read the release tag on upstream
-(`https://raw.githubusercontent.com/remorses/gpuix/@gpuix/native@<version>/packages/native/src/<file>`,
-tags exist for every release; the sibling `../gpuix` checkout lags and is not a source of truth):
-
-- `style.rs`, `struct StyleDesc` — every key and its type. `Option<f64>` keys are pixel-only,
-  `DimensionValue` takes `%`/`auto`, `String` keys are keyword-matched, and anything that is a
-  struct (`BoxShadowValue`, `BackgroundValue::Gradient`) is unreachable from CSS text. Its
-  `parse_cursor` is the cursor keyword list.
-- `renderer.rs`, `fn apply_styles` — the keywords each `String` key actually matches; a key that is
-  in `StyleDesc` but not here is accepted and ignored (`display: none`; `visibility: hidden` is
-  handled further down, as `invisible()`).
-  `sed -n '/fn apply_styles/,/^}/p' renderer.rs | grep -n 'Some("'` lists them all. `parse_font_weight`
-  is the weight names; `overflow: scroll` is handled separately in `build_host_container`.
-- `color.rs` — colour syntax (`csscolorparser`, so names and `hsl()` work).
-
-Then mirror any new pixel-only or dimension key into `NUMBER_ONLY` / `DIMENSION` in `src/style.ts`,
-add a card to `examples/styling-playground`, and confirm what actually reached GPUI headlessly:
-mount with `TestGpuixRenderer` and read `getTreeJson()` — each node's `style` is the deserialized
-`StyleDesc`, with unknown keys already dropped, which is exactly what `docs/styling.md` claims.
-
-## Writing components for this renderer
-
-`docs/styling.md`, `docs/guide.md` and `docs/components.md` are the full user-facing rules; these
-are the ones that bite most often, and the renderer behaviour behind them.
-
-- Style with `<style>` blocks for shape and colour, colours as `var(--token)` with the palette
-  handed to `set_css_vars({ token: '#fff' })` once from the root (Substrate does it in an `$effect`
-  over its `LIGHT`/`DARK` objects — a theme switch is one call), and `style:` / inline `style="..."`
-  only for measured values. Class rules accept `.btn`, `.btn.primary`, `.a, .b`, one tag, and
-  `:hover` / `:active`; specificity is class count then source order, inline `style` always wins.
-  Box shorthands work and `rem` is 16 px; `em`/`vh`/`vw` do not — GPUI lengths are logical pixels —
-  and neither do `%` or `auto` outside `width`/`height`/`min*`/`max*`, so the `auto` halves of
-  `margin: 0 auto`, and all of `border-radius: 50%`, are dropped with a warning. `flex: 1`,
-  `border: 1px solid ...`, unitless `line-height` and `display: none` misbehave in a class rule as
-  inline (see the styling playground). Shared reactive state goes in `.svelte.ts` modules.
-- Only GPUI tags exist (`div`, `text`, `img`, `svg`, `input`, `textarea`, `code`, `diff`,
-  `markdown`, `virtual-list`, `anchored`, `canvas`, ...); anything else degrades to `div` with a
-  one-time warning. `<img src>` is a filesystem path, a `data:` URL or an http(s) URL GPUI fetches
-  in the background, so give it both a width and a height. `<markdown>` is rebuilt and laid out in
-  full on every frame, on screen or not, and the cost follows its block count, not its bytes (a
-  226-block page cost ~7 ms a frame headless, ~18 ms in Substrate's window), so a long document goes
-  one block per row under `<Scroller virtual>`, which brought it under 1 ms headless and the window
-  to ~5 ms — Substrate's `Item.svelte` with `lib/blocks.ts` (one row per top-level token of
-  `marked`'s lexer) is the example. `<svg source>` inherits **no** `color` natively, so the renderer
-  copies the nearest ancestor's (from its class rules or inline style) onto any `<svg>` without one
-  and re-copies it whenever that ancestor restyles; a parent's `:hover` colour does not reach it,
-  since hover is native.
-- Only the events in `GPUI_EVENTS` fire. `keyDown`/`keyUp` require focus (`tabIndex` or
-  `autofocus`); Tab reaches `keyDown` as an ordinary key and does not move focus, so an app wires
-  `e.key === 'tab'` to `focus_next()` / `focus_previous()`, which walk the window's tab stops as of
-  the last painted frame (a stop rendered this tick joins after it paints). For shortcuts use
-  `on_window_key('keydown', handler)` (an unsubscribe comes back; `render`'s `onKeyDown`/`onKeyUp`
-  options are the same thing kept across remounts) — it fires whatever has focus, and `e.editing`
-  says a text field has focus and is getting the same key. The renderer tracks that itself by
-  always listening for `focus`/`blur` on `<input>`/`<textarea>`. `on_selection_change(handler)` (and
-  `render`'s `onSelectionChange`) rides the same window pseudo-node as `on_window_key`, through
-  `setWindowSelectionChange` on the same id. `<textarea>` Enter inserts a newline unless the element
-  has `onsubmit`.
-- `window_size` / `window_insets` are reactive getter objects, not runes: `window.ts` wraps
-  `@gpuix/native/host`'s `observeWindowSize` / `observeWindowInsets` (100 ms poll, structural
-  compare) in `createSubscriber`, because native 0.10 still has no resize event. The poll starts on
-  the first tracking read and stops a microtask after the last reader's effect is destroyed. A
-  read outside an effect gets the last polled value while a poll is live and one fresh native call
-  otherwise, and a module-level `$derived` first read outside any effect owns its poll forever
-  (`createSubscriber` semantics; Svelte's `MediaQuery` does the same). The host object resolves
-  `get_native()` on every call, so a poll that outlives a remount follows the new native. Insets
-  keep upstream's camelCase fields (`safeArea`, `keyboardVisible`, …), like every other native
-  payload. Headlessly the size is the real viewport and the insets are zero; with no native at all
-  it is upstream's 800×600 fallback.
-- **`onclick` is the primary button only; a right or middle click is `onauxclick`**, told apart by
-  `e.isRightClick`, with `e.x`/`e.y` in window coordinates — which is what positions a `<Portal>`
-  menu at the cursor (`getElementBounds` on that panel reports its content box, so it sits inset by
-  the border and padding). GPUI routes macOS's ctrl+click to `click`, not `auxClick`, so a surface
-  that wants the platform's secondary click needs both handlers; Substrate's `is_secondary(e)` in
-  `lib/ui.svelte.ts` is that check written once.
-- **No mouse event bubbling, and a painted child occludes its parent's hitbox.** (Key events are
-  the exception: a `keyDown` reaches the focused element *and* every focusable ancestor that
-  listens, so a root shortcut handler also hears what is typed into an `<input>` below it.) A child
-  with a `background-color` (or `position: absolute`) swallows clicks meant for a clickable
-  ancestor — put `hitbox="self"` on the clickable element and the renderer ships
-  `pointer-events: none` for every descendant that has no listener of its own, is not an
-  input-taking native type (`INTERACTIVE_TAGS`), is not focusable (`tabindex`/`autofocus`) and does
-  not scroll; a nested button keeps its hitbox (and shields its own decoration), and adding or
-  removing a listener later restyles that element. An explicit `pointer-events` on the descendant
-  wins. GPUI also doesn't capture the pointer on mousedown: for drags, put `mousemove`/`mouseup` on
-  the surfaces the cursor may cross (or show a window-sized `position: absolute` overlay for the
-  drag's duration, as `Scroller` does) and treat a move with `pressedButton == null` as the release
-  (see the sliders in `examples/liquid-glass/LiquidGlass.svelte`). A left mousedown also starts a
-  text selection that every later move extends across whatever text lies in between, unless the
-  element under the pointer (or an ancestor) has `user-select: none` — put it on every drag handle.
-- `motion={{ initial, animate, transition }}` animates `left`/`top`/`width`/`height`/`opacity`/
-  `borderRadius` natively (durations in seconds) — used for the toggle knobs in the liquid-glass
-  example.
-- Paint order is document order, so anything that must sit on top (a modal, a toast, a popover)
-  goes inside `<Portal>`, rendered from wherever it is needed; its children position against the
-  window. Content that should sit beside a trigger goes in `Tooltip` / `Popover`, or the native
-  `<anchored>` they build on; its child sizes to content, so it is no use for a scrim.
-- `div`/`text` accept only `autoFocus`, `tabIndex`, `testId`, `motion`, `highlight`, `role` and
-  `aria-label` / `-description` / `-id` / `-expanded` / `-selected` / `-valuetext` / `-level` as
-  props; other attributes are dropped for built-ins and forwarded for custom element types.
-  `normalize_prop` turns the string forms Svelte hands over for static attributes into the JSON
-  types native reads (`aria-expanded="true"` → `true`, `aria-level="2"` → `2`); native ignores a
-  mistyped one silently. GPUI reports roles as AccessKit names (`Button`, `Heading`), which is
-  what `getA11yTree()` on the test renderer shows.
-- `highlight={{ query } | { ranges: [[start, end], …], color, radius }}` paints GPUI's native
-  search highlight behind the matching text (character offsets into the element's text) and fires
-  `onhighlight` with `e.matchCount`. A find bar is `TextSearch` from `src/search.ts`
-  (`highlight={search.spec} onhighlight={search.on_highlight}`, then `query`, `total`, `active`,
-  `next`/`prev`/`go_to`): native's `createTextSearchController` behind `createSubscriber`. Its
-  `getSnapshot()` both builds a fresh spec and records the options `next()` counts against, so
-  `search.ts` calls it once per change, before every move, and keeps an unchanged spec's identity —
-  Svelte's `set_attribute` skips an identical value, which spares a `setCustomProp` per reported
-  count.
-- `bind:` is refused by the compiler under `customRenderer`. To get hold of an element use
-  `{@attach (node) => ...}` (or `use:`); the node is the renderer's shadow node, and `node.nativeId`
-  is what `get_native()`'s handle wants for `getScrollOffset()` / `getElementBounds()`
-  (`{ x, y, width, height }`; a clipped child still reports its full size). The scroll offset moves
-  after the wheel event returns, so read it from `onscroll` a frame later, as `Scroller` does.
-- Examples import the package by name (`import { render_hot } from 'gpuix-fractalsvelte'`) via the
-  self-reference in `exports`.
-
-## Releasing
-
-`.github/workflows/release.yml` runs release-please on every push to `main`: it keeps a release
-PR open from the conventional commits since the last release (`release-please-config.json`:
-`release-type: node`, `bump-minor-pre-major` so a pre-1.0 breaking change bumps the minor,
-`include-component-in-tag: false` for `vX.Y.Z` tags; `.release-please-manifest.json` is the last
-released version), and merging that PR tags, creates the GitHub release, runs `npm test` +
-`npm run consume` on macOS, then `npm run publish:npm` and `npm publish` in
-`packages/create-gpuix-fractalsvelte` on Linux with npm trusted publishing (OIDC, `id-token: write`;
-provenance is automatic). Each package has its own trusted publisher on npmjs.com:
-`khromov/gpuix-fractalsvelte`, workflow file `release.yml`. release-please's `extra-files` keeps
-`packages/create-gpuix-fractalsvelte/package.json`'s version equal to the root's, and the scaffolder
-writes `^<its own version>` into the app it creates (so `starter/package.json`'s own pin can lag).
-**PR titles must be conventional commits** (`feat:`, `fix:`, `docs:`, `chore:` …) — squash merges
-make the title the commit, and release-please ignores anything else. With the default
-`GITHUB_TOKEN` the release PR does not trigger `test.yml`; a `RELEASE_PLEASE_TOKEN` PAT secret
-fixes that.
-
-`starter/` is the template `create-gpuix-fractalsvelte` copies (its `prepack` syncs it into the package's
-gitignored `template/`; run from the repo, `index.js` reads `starter/` directly) and so the app
-`npm run consume` installs the packed tarball into (under `$TMPDIR`, so the checked-in one stays
-pristine). It has its own tsconfig with the `paths` for the nested svelte and its own
-`AGENTS.md` (and a `CLAUDE.md` that imports it) for the consumer's agents, and is excluded from
-the root `tsconfig`, eslint and `files`.
-
-## Runtime
-
-Node 26 (`.nvmrc`; `nvm use` before anything). Install with `bun install` (CI: `--frozen-lockfile`;
-a locked version moves within its range with `bun update <pkg>`), run scripts with
-`npm run <script>`; packing and publishing stay on npm (`npm pack` bundles the vendored svelte and
-its dependencies, and `npm publish` does the OIDC trusted publishing). Keep the source
-runtime-agnostic — `node:*` builtins only, no `Bun.*` calls and no `bun` imports outside
-`src/plugin.ts`, `scripts/compile.ts` and `scripts/web.ts` (Bun is the bundler there). Import types
-with `import type`, and components import the renderer's types (`ShadowNode` for `{@attach}`,
-`GpuixEvent` for handlers) from `'gpuix-fractalsvelte'`; `.svelte` files use `<script lang="ts">` — the
-compiler strips the types itself, and svelte-check (part of `typecheck`) checks them.
-
-## Working in this repo
-
-- Make file changes with the Edit/Write tools so every change shows as a diff; Bash is for
-  reading, running scripts and tests, and scratch files under `$TMPDIR`. Anything worth
-  remembering goes in this file, not in Claude Code's memory directory.
-- The headless renderer (Metal) and every window crash under Claude Code's Bash sandbox ("Swift
-  Fatal error: Array index out of range", hiservices XPC errors) — run `npm test`, `consume` and
-  the demos with the sandbox disabled.
-- Sibling checkouts: `../gpuix` is the fork this repo was extracted from and lags upstream (native
-  0.7.0) — read upstream release tags instead (see "Regenerating the styling reference");
-  `../svelte` (khromov/svelte) is the local copy of the custom-renderer PR stack, on its
-  `custom-condition` branch (check it out before reading; it is force-pushed about weekly);
-  `../substrate-gpuix-fractalsvelte` (khromov/substrate-gpuix-fractalsvelte, private) is Substrate, the "second
-  brain" app that consumes the published package. Wherever this file says "Substrate's `x`", the
-  path is relative to that checkout. Its `bun run test` is the largest consumer suite there is; to
-  run it against this checkout, swap its `node_modules/gpuix-fractalsvelte` for a symlink to
-  `../../gpuix-fractalsvelte`, and `bun install` there restores the published copy.
-- `typescript` is pinned `^5.9`, not 7 (the Go port changes defaults such as `types: []`);
-  `@types/node` is pinned explicitly (bun-types' `*` would float); `types/node-ffi.d.ts` adds
-  `float32`/`float64`, which `node:ffi` accepts but `@types/node` omits. Bun and tsc silently
-  map a stale `./x.js` specifier onto `x.ts`; Node's own stripping does not, so only the Node
-  suite catches one.
-- A mutation sweep (inverting each assertion in turn; every one failed its run) found two guards
-  that survive source mutation because no reachable state distinguishes them:
-  `first_native_after`'s `n.attached` check (every id-bearing node the scan reaches is attached or
-  a portal, and `!is_portal` already excludes those) and `flush_var_warnings()` sitting above
-  `commit()`'s empty-queue return (a var read always queues the `setStyle` that read it, so moving
-  it below would at worst defer a warning one frame). Both are deliberate belt-and-braces; don't
-  "cover" them, and don't delete them on the grounds that no test fails.
-- `check:svelte` talks the MCP streamable-HTTP protocol over `fetch` (initialize → tool call,
-  answered as one-message SSE) rather than pulling in a client library, and the npm script passes
-  `--use-env-proxy` so it works behind one. Its `FILTERS` table drops two classes that can never
-  apply here, each shown with its reason in the run's header: `a11y_*` for the reason
-  `svelte.config.js` filters them (they are DOM advice — keyboard handlers beside click handlers,
-  roles on static elements — and the examples were not written against them), and the autofixer's
-  "you are calling `x` inside an `$effect`" heuristic, which fires on *any* call in an effect and so
-  hits every `on_window_key` / `setInterval` subscription — all of which need the teardown
-  `$derived` has no way to hold. Matching is on message text, since suggestions carry no error
-  code, so a reworded message fails open. The surviving "stateful variable X is assigned inside an
-  `$effect`" class is deliberately **not** filtered: every current hit is an async fetch, a timer
-  or a two-way sync, but it is the class that caught tic-tac-toe's score tally. A one-shot
-  subscription with nothing reactive in it (`on_selection_change` in `examples/desktop-apis`) goes
-  through `onDestroy` instead of an `$effect`, which keeps it out of that class. A clean run reports
-  0 issues and a couple of suggestions.
-- `demo:glass-ffi` renders as an opaque dark slab over bright backdrops on every native version
-  tested: attaching the NSGlassEffectView itself turns the window opaque (the shim never opts into
-  behind-window sampling), not a renderer regression.
-
-
-## License
-
-MIT
