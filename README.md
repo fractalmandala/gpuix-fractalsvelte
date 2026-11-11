@@ -1,0 +1,326 @@
+# gpuix-fractalsvelte
+
+Write desktop apps in Svelte and render them into a native, GPU-accelerated window.
+gpuix-fractalsvelte is a Svelte custom renderer for [GPUI](https://www.gpui.rs/), the UI framework behind
+the Zed editor. It talks to GPUI through [`@gpuix/native`](https://www.npmjs.com/package/@gpuix/native).
+
+![Four gpuix-fractalsvelte demos running as native macOS windows](https://raw.githubusercontent.com/khromov/gpuix-svelte/main/.github/resources/demos.png)
+
+> [!WARNING]
+> **Experimental.** gpuix-fractalsvelte is built on Svelte's unreleased
+> [custom renderer API](https://github.com/sveltejs/svelte/pull/18511), so every release ships the
+> exact Svelte build it was tested against (see [About the Svelte
+> version](#about-the-svelte-version)). Expect breaking changes between minor versions.
+
+## Quick start
+
+```bash
+npm create @fractaldesign/gpuix-fractalsvelte@latest my-app
+cd my-app
+npm install
+npm start
+```
+
+A counter opens in its own window. Edit `App.svelte`, save, and the window hot-reloads.
+
+![The starter app's window: a rounded dark card on a black background, the count 2, a green minus button and a green plus button, the hint "Edit App.svelte and save — the window hot-reloads." and a "Light mode" button.](https://raw.githubusercontent.com/khromov/gpuix-svelte/main/homepage/assets/shots/hot-before.png)
+
+You need **Node.js 24 or later** or **Bun 1.4 or later**, on macOS (Apple Silicon), Windows (x64
+or arm64) or Linux (x64). The GPUI binary comes prebuilt from npm, so `npm install` is all the
+setup there is. On Bun, run `bunx @fractaldesign/create-gpuix-fractalsvelte my-app`, then `cd my-app`, `bun install` and
+`bun run start`. Building the app for distribution (`npm run build`: a `.app` on macOS, an `.exe`
+on Windows, a binary on Linux) needs [Bun](https://bun.com) even if you develop on Node; see
+[Shipping](docs/shipping.md).
+
+On Linux the binary loads `libxcb`, `libxkbcommon` and `libxkbcommon-x11`. Desktop installs have
+them, a minimal container does not (`apt install libxcb1 libxkbcommon0 libxkbcommon-x11-0`), and a
+machine without a GPU also needs a software Vulkan driver such as `mesa-vulkan-drivers`. Wayland
+and X11 both work. GNOME under Wayland gives the window no title bar, so there `render()` draws a
+simple one of its own ([details](docs/guide.md#title-bar-on-gnome)).
+
+## Writing Svelte with gpuix-fractalsvelte
+
+```svelte
+<!-- App.svelte -->
+<script lang="ts">
+  let count = $state(0);
+</script>
+
+<div class="app">
+  <text class="count">{count}</text>
+  <div class="btn" onclick={() => count++}>Add one</div>
+</div>
+
+<style>
+  .app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+  }
+  .count {
+    font-size: 48px;
+    color: #ededed;
+  }
+  .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #242424;
+    background-color: #111111;
+    color: #ededed;
+  }
+  .btn:hover {
+    border-color: #404040;
+    background-color: #1c1c1c;
+  }
+</style>
+```
+
+```ts
+// app.ts
+import { render_hot } from '@fractaldesign/gpuix-fractalsvelte';
+
+render_hot(new URL('./App.svelte', import.meta.url), { title: 'My app', width: 640, height: 480 });
+```
+
+```bash
+npx @fractaldesign/gpuix-fractalsvelte app.ts          # Node
+npx @fractaldesign/gpuix-fractalsvelte --bun app.ts    # Bun
+```
+
+Runes, snippets, `{#each}`, `{#if}`, `{#await}`, `<svelte:boundary>` and `.svelte.ts` state modules
+all work. Scoped `<style>` blocks work for class rules (the [styling page](docs/styling.md) has
+the details), and so does a plain `import './styles/app.css'`, which registers a whole stylesheet
+— its classes, tag rules, `:root` tokens and one palette per `[data-mode='…']` block — app-wide.
+GPUI paints the window on the GPU. Your app runs in Node or Bun, so it can read files, spawn
+processes, open SQLite databases and load native addons directly.
+
+## Coming from Svelte on the web
+
+- **HTML elements are mapped to GPUI primitives**: `div`, `text`, `img`, `svg`, `input`, `textarea`, `code`, `diff`,
+  `markdown`, `virtual-list` and `anchored`. `button` works too: an unstyled `div` that is a tab
+  stop with the button role, clicked by Enter and Space. Any other tag renders as a `div`, with a
+  one-time warning. `<img src>` takes a file path, a `data:` URL or an http(s) URL.
+- **Styling is CSS, laid out with flexbox.** Lengths are `px` or `rem` (16 px), and sizes
+  (`width`, `height`, `min-*`, `max-*`) also take `%` and `auto`. `<style>` blocks take class rules
+  with `:hover`, `:active` and `:focus-visible`. Values GPUI can't use are dropped with a warning.
+  → [docs/styling.md](docs/styling.md)
+- **Theming** is `var(--token)` in your styles plus one `set_css_vars({ token: '#fff' })` call.
+  → [docs/styling.md#theming-with-css-variables](docs/styling.md#theming-with-css-variables)
+- **A whole stylesheet is one import.** `import './styles/app.css'` registers its classes and tag
+  rules app-wide, applies its `:root` tokens, and turns each `[data-mode='dark']`-style block into
+  a palette that `use_palette('dark')` switches in one frame. The starter ships
+  [fractalstyler](https://www.npmjs.com/package/@fractaldesign/fractalstyler) that way.
+  → [docs/styling.md#stylesheets](docs/styling.md#stylesheets)
+- **Mouse events go to the element under the pointer.** Put `hitbox="self"` on a clickable
+  element and clicks on its icons and badges reach it. `onclick` is the primary button; right and
+  middle clicks are `onauxclick`.
+  → [docs/styling.md#what-works-and-what-does-not](docs/styling.md#what-works-and-what-does-not)
+- **Inputs report through events**, with the value on the event:
+  `<input value={text} onchange={(e) => (text = e.value)} />`. There is no `bind:`, and
+  `{@attach}` hands you the element. → [docs/guide.md](docs/guide.md)
+- **Keyboard shortcuts** go through `on_window_key('keydown', handler)`, which hears keys
+  whatever has focus. → [docs/guide.md](docs/guide.md#keyboard-shortcuts-and-focus)
+- **`Scroller`, `Portal`, `Tooltip` and `Popover` ship with the package**: a scroll column with a
+  draggable scrollbar (virtualised on request), a wrapper that paints modals, menus and toasts on
+  top from anywhere in the tree, and a hover tip and a controlled panel that hang beside their
+  trigger. → [docs/components.md](docs/components.md)
+- **Window and desktop APIs** cover the title, fullscreen, the file picker, file drops, images
+  from raw pixels, focus and accessibility attributes.
+  → [docs/guide.md](docs/guide.md#window-and-desktop-helpers)
+- **Svelte components render in both gpuix-fractalsvelte and a normal DOM.** The same components can be shared
+  between a gpuix-fractalsvelte app and a normal Svelte app such as SvelteKit: a Vite or SvelteKit build
+  gets DOM versions of every helper and component under the same imports, and `IS_GPUIX` tells a
+  component which renderer it is on. → [docs/dom.md](docs/dom.md), and a SvelteKit site and a GPUI window
+  sharing one component library:
+  [gpuix-svelte-sveltekit-shared-components-demo](https://github.com/khromov/gpuix-svelte-sveltekit-shared-components-demo)
+
+## Documentation
+
+| | |
+|---|---|
+| [Styling](docs/styling.md) | Every CSS property and value GPUI understands, what is dropped, theming with variables, importing a `.css` stylesheet |
+| [Components](docs/components.md) | `Scroller` (incl. virtualised lists), `Portal`, `Tooltip`, `Popover`, and the native `<anchored>` they build on |
+| [Guide](docs/guide.md) | Forms, text search, keyboard and focus, reactive window size, the title bar on GNOME, window and desktop helpers, state that survives hot reload |
+| [Accessibility](docs/accessibility.md) | What reaches a screen reader, what GPUI lacks and what to use instead, keyboard patterns for menus, dialogs and lists |
+| [Testing](docs/testing.md) | Headless tests that click through GPUI's real hit testing, screenshots, and driving a running window |
+| [Shipping](docs/shipping.md) | Standalone binaries, signed macOS apps, and running in a browser via WebGPU |
+| [DOM](docs/dom.md) | Rendering Svelte components in both gpuix-fractalsvelte and normal DOM, with Vite or SvelteKit: `IS_GPUIX`, what each helper and component does there, writing for both renderers |
+| [Updating](docs/updating.md) | In-app updates from a static manifest, hash and signature checked, with a GitHub release workflow |
+
+For real code, the [examples](examples) are the best reference (see [Examples](#examples)). To try
+a component without installing anything, the [playground](https://gpuix-svelte.stanislav.garden/playground.html)
+compiles one in the browser and runs it on GPUI's WebAssembly build or in the DOM, with the
+element tree, the mutations and the compiled JavaScript beside it.
+
+## Adding it to an existing project
+
+```bash
+npm install gpuix-fractalsvelte
+```
+
+`@fractaldesign/gpuix-fractalsvelte` brings its own Svelte, so it's the only runtime dependency you add (see [About the
+Svelte version](#about-the-svelte-version)). Run your entry through the package's bin, usually from
+`package.json`:
+
+```json
+{
+  "type": "module",
+  "scripts": {
+    "start": "gpuix-fractalsvelte app.ts",
+    "test": "gpuix-fractalsvelte test.ts"
+  }
+}
+```
+
+The bin starts Node, or Bun when you pass `--bun` or launch it with `bun run`. Before your entry
+loads, it points `svelte` at the build with the custom renderer API and teaches the runtime to
+import `.svelte` files. Your `.ts` files need nothing extra: Node and Bun run TypeScript
+themselves.
+
+Runtime flags go before the entry, and a flag that takes a value needs the `=` form
+(`gpuix-fractalsvelte --experimental-ffi app.ts`, `gpuix-fractalsvelte --import=tsx app.ts`). Arguments after
+the entry go to your script. Spelled out, the bin runs:
+
+```bash
+node --conditions custom-renderer --conditions development --import @fractaldesign/gpuix-fractalsvelte/register app.ts
+bun  --conditions custom-renderer --conditions development --preload @fractaldesign/gpuix-fractalsvelte/plugin app.ts
+```
+
+The two `--conditions` flags matter: without them `svelte` resolves to its server build and
+`mount()` does not exist. A `bunfig.toml` preload on its own is not enough for a plain `bun file.ts`
+run, so go through the bin.
+
+### TypeScript
+
+The package ships type declarations. Your `tsconfig.json` needs a `paths` entry that points at the
+Svelte build nested inside the package. For the editor and `svelte-check` to type your markup as
+GPUI elements, it also needs the `gpuixHTML` namespace:
+
+```jsonc
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "customConditions": ["custom-renderer", "development"],
+    "types": ["node", "@fractaldesign/gpuix-fractalsvelte/html"],
+    "skipLibCheck": true,
+    "paths": {
+      "svelte": ["./node_modules/@fractaldesign/gpuix-fractalsvelte/node_modules/svelte"],
+      "svelte/*": ["./node_modules/@fractaldesign/gpuix-fractalsvelte/node_modules/svelte/*"]
+    }
+  },
+  "svelteOptions": { "namespace": "gpuixHTML" }
+}
+```
+
+That config needs `typescript`, `@types/node` and `svelte-check` as dev dependencies. You'll also
+want a `*.svelte` module declaration and a `svelte.config.js` that turns off Svelte's DOM
+accessibility advice. [`starter/`](starter) has all of it, ready to copy.
+
+Node runs TypeScript by stripping the types, which rules out enums, namespaces, parameter
+properties, a type imported without `import type`, and a relative import without a file
+extension. Bun transpiles and accepts all of those, but the config above makes `tsc` flag them so
+the app runs on both. If your app needs that syntax on Node anyway, install tsx and load it through
+the bin: `gpuix-fractalsvelte --import=tsx app.ts`.
+
+Event handlers take a `GpuixEvent` and `{@attach}` gets a `ShadowNode`. Both are exported as types:
+
+```svelte
+<script lang="ts">
+  import type { GpuixEvent, ShadowNode } from '@fractaldesign/gpuix-fractalsvelte';
+</script>
+```
+
+## Examples
+
+Every example under [`examples/`](examples/) is an ordinary app: its `.svelte` components and a
+`main.ts` that calls `render_hot`, so any of them drops into a project made with
+`npm create @fractaldesign/gpuix-fractalsvelte` (`liquid-glass-ffi` also needs the `liquid-glass` component beside it).
+The scripts below run them in a clone of the repository (`bun install`, then the command):
+
+| | |
+|---|---|
+| `npm run demo:counter` | The counter, hot-reloading on save |
+| `npm run demo:tictactoe` | Tic-tac-toe with score tracking |
+| `npm run demo:hn` | Hacker News reader: live network data in a scrolling list |
+| `npm run demo:glass` | A translucent control center over macOS vibrancy (`demo:glass-ffi`: NSGlassEffectView via FFI, macOS 26 and Node 26.1 or later) |
+| `npm run demo:styling` | Which CSS reaches GPUI and which is dropped, side by side |
+| `npm run demo:desktop` | Window controls, file picker and drops, live image pixels, selection, focus, accessibility |
+| `npm run demo:native-0.11` | What `@gpuix/native` 0.11 added: keyboard focus styles and dimming, Tab, layout and scroll events, new styles, fonts |
+| `npm run demo:web` | Tic-tac-toe in a browser on GPUI's WebAssembly build (Bun) |
+| `npm run demo:cross` | One component on both renderers: a GPUI window here, a browser DOM through Vite with `npm run demo:dom` |
+| `npm run tutorial` | A 12-step interactive guide to the renderer, itself a gpuix-fractalsvelte app |
+
+Each of these, apart from `demo:web` (which always runs on Bun) and `demo:dom` (Vite), has a Bun
+twin under a `bun:` prefix, such as `npm run bun:demo:counter`.
+
+Outside this repository,
+[gpuix-svelte-sveltekit-shared-components-demo](https://github.com/khromov/gpuix-svelte-sveltekit-shared-components-demo)
+is a small component library rendered by a SvelteKit site and by a GPUI window at the same time,
+with `npm run dev` opening both.
+
+## About the Svelte version
+
+The custom renderer API is still an open Svelte pull request. Each release of this package
+**bundles** the exact build of that pull request it was tested against, inside
+`node_modules/@fractaldesign/gpuix-fractalsvelte/node_modules/svelte`, and every `svelte` import, yours included,
+resolves to that copy.
+
+In practice:
+
+- `@fractaldesign/gpuix-fractalsvelte` is your one dependency, and the Svelte you import is the one it brings. Keep
+  `svelte` itself out of your `package.json`.
+- Upgrading `@fractaldesign/gpuix-fractalsvelte` can change the Svelte build underneath you, so read the changelog before
+  a minor bump.
+- `svelte-check` installs the registry's Svelte as its own peer dependency and uses it to read your
+  components. The `paths` entry in your tsconfig points type imports at the bundled build.
+
+## Good to know
+
+- A draggable scrollbar comes from `Scroller`. `scrollbar-color` makes GPUI paint its own thumb,
+  but that one can't be dragged.
+- Context menus are drawn by the app: a `Popover` with `position`, or a `<Portal>`, placed at the
+  `onauxclick` coordinates. On macOS, ctrl+click arrives as `onclick` with `e.modifiers.ctrl`, so
+  handle both.
+- `left`, `top`, `right` and `bottom` take pixels only. A progress bar's fill sizes with
+  `width: 50%`.
+- `<svg>` inherits `color` from its nearest ancestor, but not that ancestor's `:hover` colour.
+- Headless tests run on macOS and Windows. On Linux, drive a real window instead (see
+  [Testing](docs/testing.md)).
+- Standalone binaries are built with Bun through `build()` from `@fractaldesign/gpuix-fractalsvelte/build`, which a
+  scaffolded app already calls from its `build.ts`. Web bundles start from the repository's
+  `scripts/web.ts`. See [docs/shipping.md](docs/shipping.md).
+
+## How it works
+
+Svelte's custom renderer API hands the renderer DOM-shaped operations: create an element, insert
+it before an anchor, set an attribute, add a comment node. GPUI's tree is flat, keyed by numeric
+id, and holds elements and text. gpuix-fractalsvelte keeps a lightweight shadow tree in JavaScript and
+projects it onto GPUI. Only elements and non-blank text get native nodes, and they're created
+lazily, once they're attached to the window. Every change in a frame is queued and shipped as one
+batch before the next paint.
+
+Around that sit a `.svelte` loader for Node and one for Bun, which compile components with the
+renderer baked in and turn `<style>` blocks into class rules, a translator from CSS to GPUI
+styles that expands shorthands and drops what GPUI would reject, a ~125 fps frame loop, and
+in-process hot reload. The full design notes are in [CLAUDE.md](CLAUDE.md).
+
+## Contributing
+
+See [docs/contributing.md](docs/contributing.md) for running the demos and tests, moving the
+vendored Svelte build, and how releases are cut.
+
+## License
+
+MIT

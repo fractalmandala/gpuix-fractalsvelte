@@ -1,0 +1,80 @@
+/* A stylesheet in the shape a design system ships: tokens in `:root`, one block per mode,
+   a layer around them, an `@import`, and the handful of selectors and shorthands GPUI
+   cannot take. test/stylesheet.ts asserts both what lands and what is skipped. */
+@import './stylesheet-extra.css';
+
+@layer tokens {
+	:root {
+		--space: 8px;
+		--nested: var(--space);
+		--text: 1rem;
+	}
+	[data-mode='light'] {
+		--bg: #ffffff;
+		--ink: #111111;
+	}
+	[data-mode='dark'] {
+		--bg: #101010;
+		--ink: #eeeeee;
+	}
+}
+
+:root {
+	--theme: #00ff00;
+}
+
+body {
+	font-family: var(--sans);
+}
+
+@media (min-width: 900px) {
+	.wide {
+		color: red;
+	}
+}
+
+.card {
+	padding-inline: var(--nested);
+	background-color: var(--bg);
+	border: 1px solid var(--theme);
+	color: var(--ink);
+}
+
+.card:hover {
+	border-color: var(--theme);
+}
+
+.card:focus-visible {
+	outline: 2px solid var(--theme);
+}
+
+:where(.carded) {
+	padding-block: 4px;
+}
+
+button {
+	color: var(--theme);
+}
+
+.ratio {
+	font-size: 20px;
+	line-height: 1.5;
+}
+
+.flexy {
+	flex: 1 1 0%;
+}
+
+.rowy {
+	gap: 12px;
+	min-block-size: 10px;
+}
+
+.over {
+	color: #ff0000;
+}
+
+.card > .nested,
+.card .descendant {
+	color: red;
+}

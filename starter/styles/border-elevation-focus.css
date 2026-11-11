@@ -1,0 +1,89 @@
+.border {
+  border: 1px solid var(--border);
+}
+
+.border-subtle {
+  border: 1px solid var(--border-subtle);
+}
+
+.border-strong {
+  border: 1px solid var(--border-strong);
+}
+
+.bt {
+  border-top: 1px solid var(--border);
+}
+
+.br {
+  border-right: 1px solid var(--border);
+}
+
+.bb {
+  border-bottom: 1px solid var(--border);
+}
+
+.bl {
+  border-left: 1px solid var(--border);
+}
+
+.bt-str {
+  border-top: 1px solid var(--border-strong);
+}
+
+.br-str {
+  border-right: 1px solid var(--border-strong);
+}
+
+.bb-str {
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.bl-str {
+  border-left: 1px solid var(--border-strong);
+}
+
+.bt-sub {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.br-sub {
+  border-right: 1px solid var(--border-subtle);
+}
+
+.bb-sub {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.bl-sub {
+  border-left: 1px solid var(--border-subtle);
+}
+
+.shad-xs { box-shadow: var(--shadow-xs); }
+.shad-sm { box-shadow: var(--shadow-sm); }
+.shad-md { box-shadow: var(--shadow-md); }
+.shad-bs { box-shadow: var(--shadow-bs); }
+.shad-lg { box-shadow: var(--shadow-lg); }
+.shad-xl { box-shadow: var(--shadow-xl); }
+.shad-2xl { box-shadow: var(--shadow-2xl); }
+.shad-3xl { box-shadow: var(--shadow-3xl); }
+
+.shad-hover-xs { box-shadow: var(--shadow-xs); }
+.shad-hover-xs:hover { box-shadow: none; }
+.shad-hover-sm { box-shadow: var(--shadow-sm); }
+.shad-hover-sm:hover { box-shadow: var(--shadow-xs); }
+.shad-hover-md { box-shadow: var(--shadow-md); }
+.shad-hover-md:hover { box-shadow: var(--shadow-xs); }
+.shad-hover-bs { box-shadow: var(--shadow-bs); }
+.shad-hover-bs:hover { box-shadow: var(--shadow-xs); }
+.shad-hover-lg { box-shadow: var(--shadow-lg); }
+.shad-hover-lg:hover { box-shadow: var(--shadow-xs); }
+.shad-hover-xl { box-shadow: var(--shadow-xl); }
+.shad-hover-xl:hover { box-shadow: var(--shadow-xs); }
+.shad-hover-2xl { box-shadow: var(--shadow-2xl); }
+.shad-hover-2xl:hover { box-shadow: var(--shadow-xs); }
+.shad-hover-3xl { box-shadow: var(--shadow-3xl); }
+.shad-hover-3xl:hover { box-shadow: var(--shadow-xs); }
+
+.focus-ring:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.focus-theme:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
+.focus-none:focus, .focus-none:focus-visible { outline: none; }	

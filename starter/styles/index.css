@@ -1,0 +1,24 @@
+/* fractalstyler — the stylesheet, as one file.
+ *
+ * The layers are plain CSS and are concatenated in this order by
+ * scripts/build-css.ts. Importing this file is the same as importing them
+ * one by one, in this order.
+ *
+ * To use a subset, import the layers you need from
+ * '@fractaldesign/fractalstyler/styles/<layer>.css' — the cascade order
+ * above is the order that works.
+ */
+@import './configurations.css';
+@import './gaps-pads-margins.css';
+@import './shapes-sizes.css';
+@import './containers.css';
+@import './typography.css';
+@import './border-elevation-focus.css';
+@import './layout-shell.css';
+@import './colors-themes.css';
+@import './motion-animation.css';
+@import './components.css';
+@import './component-props.css';
+@import './responsive.css';
+@import './custom.css';
+@import './colorpacks.css';

@@ -1,0 +1,28 @@
+/* Please refer to `docs/canonicals.md` to see the correct usage for these classes. */
+
+.app-shell { display: flex; flex-direction: column; position: relative; min-height: 100vh; }
+.app-header { display: flex; flex-direction: row; align-items: center; position: sticky; top: 0; z-index: var(--z-sticky); height: var(--header-height); padding-inline: var(--app-inline); }
+.app-header.clamped { width: var(--content-clamp); margin-inline: auto; }
+.app-main { flex: 1 1 0%; min-width: 0; min-height: calc(100dvh var(--fit-height)); display: flex; flex-direction: row; }
+.app-main.clamped { width: var(--content-clamp); margin-inline: auto; }
+.main-section { flex: 1 1 0%; min-width: 0; }
+.main-section.solo { padding-inline: var(--app-inline); }
+.sidebar-left, .sidebar-right { display: none; flex-shrink: 0; position: sticky; top: var(--header-height); height: calc(100dvh var(--fit-height)); overflow-y: auto; }
+.sidebar-left ul, .sidebar-left ol, .sidebar-right ul, .sidebar-right ol { margin-left: 0; padding-left: 0; }
+.sidebar-left { width: var(--sidebar-width-left); }
+.sidebar-right { width: var(--sidebar-width-right); }
+@media (max-width: 1024px) { .app-shell.open .sidebar-left { display: block; position: fixed; left: 0; z-index: var(--z-modal); height: var(--fit-height); } }
+@media (min-width: 1025px) { .sidebar-left { display: block; } }
+@media (min-width: 1281px) { .sidebar-right { display: block; } }
+.app-footer { display: flex; flex-direction: row; align-items: center; padding-inline: var(--app-inline); min-height: var(--footer-height); }
+.content-section { width: 100%; }
+.content-section.null { padding-inline: 0 var(--space-bs); }
+@media (min-width: 769px) { .content-section { padding-inline: var(--space-bs); } .content-section.narrow-half { width: 640px; margin-inline: auto; } .content-section.narrow-wide { width: 720px; margin-inline: auto; } }
+@media (min-width: 1025px) { .content-section.narrow-full { width: 640px; margin-inline: auto; } .content-section.narrow-half { width: 750px; padding-right: 25px; } .content-section.narrow-wide { width: 750px; } }
+@media (min-width: 1281px) { .content-section.narrow-full { width: 680px; } .content-section.narrow-half { width: 800px; padding-right: 120px; } .content-section.narrow-wide { width: 1024px; } }
+@media (min-width: 1441px) { .content-section.narrow-wide { width: 1280px; } .content-section.narrow-half { width: 1024px; } }
+.nav-section { display: flex; flex-direction: column; }
+.logo-link { display: inline-flex; align-items: center; text-decoration: none; color: inherit; }
+.toc-section { display: flex; flex-direction: column; }
+.toc-link { display: block; font-size: var(--text-sm); color: var(--text-secondary); text-decoration: none; }
+.toc-link:hover { color: var(--theme-color); }

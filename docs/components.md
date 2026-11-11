@@ -1,0 +1,439 @@
+# Components
+
+Four components ship in the package: `Scroller`, `Portal`, `Tooltip` and `Popover`. They're
+plain `.svelte` files and compile like your own components:
+
+```svelte
+<script>
+  import Scroller from '@fractaldesign/gpuix-fractalsvelte/components/Scroller.svelte';
+  import Portal from '@fractaldesign/gpuix-fractalsvelte/components/Portal.svelte';
+  import Tooltip from '@fractaldesign/gpuix-fractalsvelte/components/Tooltip.svelte';
+  import Popover from '@fractaldesign/gpuix-fractalsvelte/components/Popover.svelte';
+</script>
+```
+
+Each one runs live on this page, in the DOM ([how](dom.md#the-components-in-the-dom)): the
+sample under a demo is the component you see above it, compiled by Svelte's DOM renderer for your
+browser. In a GPUI window the same source draws natively. The samples take their colours from
+tokens this page defines (`--paper`, `--ink`, `--panel`, `--raised`, `--dim`), the way an app's
+come from `set_css_vars`.
+
+## Scroller
+
+GPUI's own scrollbar (`scrollbar-color`, see [Styling](styling.md)) can't be dragged, so
+`Scroller` is a scroll column that draws its own thumb in a gutter, follows the wheel and lets you
+drag the thumb.
+
+Props:
+
+- `gap` (default `8`, in px) and `pad` (default `'0'`, CSS padding text) for the content column.
+- `grow` (default `1`), the scroller's `flex-grow`.
+- `scroll={false}` clips the content and draws no thumb.
+- `follow` keeps the bottom in view while content grows, as in a streaming reply.
+- `virtual` and `estimate` make it a [virtual list](#virtual-lists).
+- `testid` goes on the scroll column. The thumb gets `<testid>-thumb` and the drag overlay
+  `<testid>-overlay`.
+
+Colours come from `var(--scroller-thumb)` and `var(--scroller-thumb-hover)`, with greys as
+fallbacks.
+
+```svelte demo scroller
+<script>
+  import Scroller from '@fractaldesign/gpuix-fractalsvelte/components/Scroller.svelte';
+
+  let lines = $state(Array.from({ length: 20 }, (_, i) => `Line ${i + 1}`));
+  let follow = $state(true);
+</script>
+
+<div class="row">
+  <div class="btn" onclick={() => lines.push(`Line ${lines.length + 1}`)}>Append a line</div>
+  <div class="chip" onclick={() => (follow = !follow)}>follow: {follow ? 'on' : 'off'}</div>
+</div>
+<div class="pane">
+  <Scroller gap={4} pad="8px" {follow}>
+    {#each lines as line (line)}
+      <div class="line">{line}</div>
+    {/each}
+  </Scroller>
+</div>
+
+<style>
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--panel);
+  }
+  .chip:hover {
+    background-color: var(--raised);
+  }
+  .pane {
+    display: flex;
+    height: 180px;
+    border-radius: 8px;
+    background-color: var(--panel);
+  }
+  .line {
+    padding: 6px 10px;
+    border-radius: 4px;
+    background-color: var(--raised);
+  }
+</style>
+```
+
+### Virtual lists
+
+A plain scroll column lays out and paints every child on every frame, on screen or off, so a long
+list slows down in proportion to its length. With `virtual`, `Scroller` renders GPUI's native
+`<virtual-list>`, and GPUI lays out and paints only the rows near the viewport. Svelte still
+creates every row; only the layout and paint are skipped.
+
+- Every direct child is one row. Wrap each item in a `div` with `width: 100%`, since rows size to
+  their content, and space rows with padding inside them: `gap` applies only to the plain column.
+- `estimate` (default `80`) is the height hint for rows GPUI hasn't measured yet.
+- `follow` becomes the list's own tail-following.
+- `pad` pads the box around the list, so it does not scroll with the rows. No gutter is reserved,
+  so the thumb paints over the rows' right edge. `scroll={false}` is ignored.
+- Nothing reports a change in row count, so the thumb re-reads the list's position every 250 ms
+  (100 ms with `follow`).
+
+## Portal
+
+Paint order is document order, so a modal, toast or menu would otherwise have to be the root's
+last child. `<Portal>` renders from wherever the overlay is needed and still paints on top. Svelte
+sees it where you wrote it, so `{#if}` blocks and teardown work as usual. The wrapper covers the
+window without taking clicks itself, and its children position against the window and stay
+clickable:
+
+```svelte
+{#if confirming}
+  <Portal>
+    <div class="scrim" onclick={() => (confirming = false)}>
+      <div class="dialog">…</div>
+    </div>
+  </Portal>
+{/if}
+```
+
+A portal mounted later paints over one mounted earlier, so a portal that re-shows through `{#if}`
+moves to the top. `Tooltip` and `Popover` paint above every portal, because `<anchored>` draws in
+a deferred layer.
+
+```svelte demo portal
+<script>
+  import Portal from '@fractaldesign/gpuix-fractalsvelte/components/Portal.svelte';
+
+  let open = $state(false);
+</script>
+
+<div class="row">
+  <div class="btn" onclick={() => (open = true)}>Open a dialog</div>
+</div>
+
+{#if open}
+  <Portal>
+    <div class="scrim" onclick={() => (open = false)}>
+      <div class="dialog" onclick={(e) => e.stopPropagation()}>
+        <div class="heading">Rendered here, painted on top</div>
+        <div>
+          The dialog is a child of this demo and still covers the whole window. A click outside closes it.
+        </div>
+        <div class="btn" onclick={() => (open = false)}>Close</div>
+      </div>
+    </div>
+  </Portal>
+{/if}
+
+<style>
+  .row {
+    display: flex;
+  }
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+  .scrim {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: #00000099;
+  }
+  .dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 360px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: var(--panel);
+    color: var(--ink);
+  }
+  .heading {
+    font-size: 16px;
+    font-weight: 600;
+  }
+</style>
+```
+
+## Tooltip
+
+A hover tip beside its trigger, built on `<anchored>`. It shows after `delay` ms of hover and stays
+open while the pointer crosses onto the tip, with an 80 ms grace for the gap. A trigger that spreads
+the snippet's focus handlers also shows it at once on keyboard focus and hides it on blur, until the
+pointer takes over. Escape hides it either way. The tip takes no clicks, so they land on whatever
+lies beneath it.
+
+Props:
+
+- `content`: a string or a snippet.
+- `side` (default `top`), `align` (default `center`), `gap` (default `6`) and `delay` (default
+  `300`).
+- `open` forces the tip shown or hidden. `null`, the default, leaves it to hover and focus.
+- `style`: inline CSS for one tip, which wins over the tip's own rules
+  (`style="padding: 8px 12px; border-radius: 0; background-color: #ff3e00"`).
+- `testid` goes on the wrapper around the trigger. The tip gets `<testid>-tip`.
+
+Colours come from `var(--tooltip-surface)` and `var(--tooltip-ink)`, which you set for the whole
+app with `set_css_vars`.
+
+A decorative trigger (text, an icon, a badge) needs nothing more, but a keyboard can't reach it, so
+put nothing in its tip that isn't on screen elsewhere. A trigger with a handler of its own, such as
+a button, takes the hover for itself, so spread the hover handlers the `children` snippet receives
+onto it. A trigger that takes keyboard focus (one with `tabindex`) spreads the second argument, the
+focus handlers, too. Leave those off anything else: on GPUI, listening for focus makes an element
+focusable, so a click on it would take focus away from a text field.
+
+```svelte
+<Tooltip content="Save (⌘S)">
+  {#snippet children(hover, focus)}
+    <div class="btn" role="button" tabindex="0" {...hover} {...focus} onclick={save}>Save</div>
+  {/snippet}
+</Tooltip>
+```
+
+```svelte demo tooltip
+<script>
+  import Tooltip from '@fractaldesign/gpuix-fractalsvelte/components/Tooltip.svelte';
+
+  let saves = $state(0);
+</script>
+
+<div class="row">
+  {#each ['top', 'right', 'bottom', 'left'] as side (side)}
+    <Tooltip content="A tip on the {side}" {side}>
+      <div class="chip">{side}</div>
+    </Tooltip>
+  {/each}
+  <Tooltip content="Aligned with the start edge" side="bottom" align="start">
+    <div class="chip">start</div>
+  </Tooltip>
+  <Tooltip content="Aligned with the end edge, after a second" side="bottom" align="end" delay={1000}>
+    <div class="chip">end</div>
+  </Tooltip>
+  <Tooltip content="Save (⌘S)">
+    {#snippet children(hover)}
+      <div class="btn" {...hover} onclick={() => saves++}>{saves ? `Saved ×${saves}` : 'Save'}</div>
+    {/snippet}
+  </Tooltip>
+</div>
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: default;
+    user-select: none;
+    background-color: var(--panel);
+  }
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+</style>
+```
+
+## Popover
+
+A controlled panel beside its trigger. You own `open`, and the trigger toggles it. `onclose` fires
+on a press outside both the panel and the trigger (any mouse button) and on Escape. A press on the
+trigger is left to the trigger's own click, so it closes the panel without reopening it.
+
+Props:
+
+- `open`, `onclose`, and `content` (the panel's snippet).
+- `side` (default `bottom`), `align` (default `start`) and `gap` (default `4`).
+- `position`: `{ x, y }` in window coordinates to hang the panel from in place of the trigger. An
+  `onauxclick`'s `e.x` / `e.y` puts a context menu at the cursor. A press inside the trigger's box
+  never counts as outside, so a large trigger that only has `onauxclick` needs an `onclick` that
+  closes the menu.
+- `style`: inline CSS for the panel, as with `Tooltip`. Use it for padding, radius, border or
+  surface.
+- `testid` goes on the wrapper around the trigger. The panel gets `<testid>-panel`.
+
+Colours come from `var(--popover-surface)`, `var(--popover-border)` and `var(--popover-ink)`.
+
+```svelte
+<Popover open={menu} onclose={() => (menu = false)}>
+  <div class="btn" onclick={() => (menu = !menu)}>Menu</div>
+  {#snippet content()}
+    <div class="item" onclick={rename}>Rename</div>
+  {/snippet}
+</Popover>
+```
+
+`Tooltip` and `Popover` both wrap the trigger in a box that hugs it, at the start of whatever space
+the parent gives them, and hang their layer off that box.
+
+The second popover below hangs from `position` instead of its trigger. A plain click gives both
+renderers the pointer's `e.x` / `e.y`; on GPUI a right click would come through `onauxclick`.
+
+```svelte demo popover
+<script>
+  import Popover from '@fractaldesign/gpuix-fractalsvelte/components/Popover.svelte';
+
+  let menu = $state(false);
+  let context = $state(false);
+  let at = $state({ x: 0, y: 0 });
+  let picked = $state('nothing yet');
+
+  function pick(item) {
+    picked = item;
+    menu = context = false;
+  }
+</script>
+
+{#snippet items()}
+  {#each ['Rename', 'Duplicate', 'Delete'] as item (item)}
+    <div class="item" onclick={() => pick(item)}>{item}</div>
+  {/each}
+{/snippet}
+
+<div class="row">
+  <Popover open={menu} onclose={() => (menu = false)} content={items}>
+    <div class="btn" onclick={() => (menu = !menu)}>Actions</div>
+  </Popover>
+  <Popover open={context} onclose={() => (context = false)} content={items} position={at}>
+    <div class="pad" onclick={(e) => ((at = { x: e.x, y: e.y }), (context = true))}>
+      Click anywhere in here for a menu at the pointer
+    </div>
+  </Popover>
+</div>
+<div class="dim">Picked: {picked}</div>
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+  .pad {
+    padding: 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--panel);
+    color: var(--dim);
+  }
+  .item {
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .item:hover {
+    background-color: var(--raised);
+  }
+  .dim {
+    color: var(--dim);
+  }
+</style>
+```
+
+## `<anchored>`
+
+For anything else that should sit beside a trigger, GPUI's native `<anchored>` element positions
+its child relative to the element it's rendered in. It hangs off its parent's box, zero-sized and
+out of flow. Its layer sizes to its content, unless `fill="window"` makes it cover the window, which
+is how to build a scrim. Its own `style` styles the layer. It hears only `click`, `mouseenter`,
+`mouseleave` and `filedrop`, so `onmousedownoutside` goes on a child.
+
+Two GPUI quirks, as of `@gpuix/native` 0.11:
+
+- Give `<anchored>` itself a background (`transparent` will do), or GPUI paints an opaque
+  `#1a1a1a` behind it.
+- `align="center"` lands half the layer's own width (or height) short of centre. That's why the
+  components hang their layer from a zero-sized box that flex places on the trigger's edge, with
+  the `anchor` corner named explicitly.
+
+Its props. Pass numbers and booleans as expressions (`gap={6}`, `deferred={false}`): a quoted
+string reaches native as a string and reads as `0` or `true`.
+
+| prop | values | default |
+|---|---|---|
+| `position` | `{ x, y }` in window coordinates; overrides the trigger | — |
+| `side` | `top` `right` `bottom` `left` — the trigger edge to hang off | `bottom` |
+| `align` | `start` `center` `end` along that side | `start` |
+| `anchor` | `topLeft` `topCenter` `topRight` `rightCenter` `bottomRight` `bottomCenter` `bottomLeft` `leftCenter`; derived from `side` + `align` when unset | — |
+| `gap` | px between trigger and child | `0` |
+| `offset` | `{ x, y }` px, applied after positioning | `{ x: 0, y: 0 }` |
+| `fit` | `snap` keeps it inside the window; `switch` flips the anchor | `snap` |
+| `snapMargin` | px kept from the window edge when snapping | `8` |
+| `deferred` | paint in a later layer, above everything drawn so far | `true` |
+| `priority` | order among deferred layers; higher paints later | `1` |
+| `occlude` | block hit testing on what lies beneath | `true` |
+| `fill` | `window` covers the whole window and follows a resize; ignores the placement props | — |
+
+## In a browser DOM
+
+All four render in the DOM as well, so the same components can be shared between a gpuix-fractalsvelte
+app and a normal Svelte app such as SvelteKit. A Vite or SvelteKit build gets their DOM versions
+under the same import paths, with the same props and CSS variables: the browser scrolls the `Scroller`, `Portal` moves
+its layer to `<body>`, and `Tooltip` and `Popover` place a fixed layer beside the trigger. See
+[Rendering Svelte components in both gpuix-fractalsvelte and normal DOM](dom.md#the-components-in-the-dom),
+and for all four inside a library that a SvelteKit site and a GPUI window share,
+[gpuix-svelte-sveltekit-shared-components-demo](https://github.com/khromov/gpuix-svelte-sveltekit-shared-components-demo).

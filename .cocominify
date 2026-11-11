@@ -1,0 +1,10 @@
+homepage/
+examples/
+starter/
+CLAUDE.md
+scripts/*
+docs/assets/*
+.github
+CHANGELOG.md
+README.md
+AGENTS.md

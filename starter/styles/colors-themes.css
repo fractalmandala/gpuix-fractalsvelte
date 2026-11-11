@@ -1,0 +1,133 @@
+@layer tokens {
+  [data-mode='light'] {
+    color-scheme: light;
+    --white-fixed: #FFFFFF;
+    --black-fixed: #18181B;
+    --bg: oklch(1.00 0.000 148);
+    --bg-surface: oklch(0.96 0.000 148);
+    --bg-panel: oklch(0.94 0.000 148);
+    --bg-button: oklch(0.20 0.002 148);
+    --bg-button-hover: oklch(0.28 0.002 148);
+    --bg-button-active: oklch(0.15 0.002 148);
+    --bg-button-secondary: oklch(0.50 0.002 148);
+    --bg-button-secondary-hover: oklch(0.58 0.002 148);
+    --bg-button-secondary-active: oklch(0.44 0.002 148);
+    --bg-input: oklch(0.96 0.000 148);
+    --state-hover: oklch(0 0 0 / .15);
+    --state-selected: oklch(0 0 0 / .3);
+    --border: oklch(0.90 0.000 148);
+    --border-strong: oklch(0.75 0.000 148);
+    --border-subtle: oklch(0.95 0.000 148);
+    --text-primary: oklch(0.15 0.003 148);
+    --text-secondary: oklch(0.40 0.003 148);
+    --text-muted: oklch(0.60 0.005 148);
+    --text-inverse: oklch(1.00 0.000 148);
+    --theme-color: oklch(0.50 0.750 130);
+    --theme-color-up: oklch(0.75 0.750 130);
+    --theme-color-down: oklch(0.40 0.750 130);
+    /* .themed:hover/.link:hover and .themed.selected read these two, which no layer defines. */
+    --theme-color-sub: var(--theme-color-down);
+    --theme-color-alt: var(--theme-color-up);
+    --success: oklch(0.65 0.200 138);
+    --success-hover: oklch(0.55 0.200 138);
+    --warning: oklch(0.85 0.180 92);
+    --warning-hover: oklch(0.80 0.180 92);
+    --danger: oklch(0.60 0.250 25);
+    --danger-hover: oklch(0.50 0.250 25);
+    --info: oklch(0.50 0.220 260);
+    --info-hover: oklch(0.40 0.220 260);
+    --ring: rgba(255, 208, 0, 0.4);
+    --shadow-color: 0 0 0;
+    --shadow-rim: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --shadow-xs: 0 1px 2px rgb(var(--shadow-color) / 0.05);
+    --shadow-sm: 0 1px 2px rgb(var(--shadow-color) / 0.1), 0 2px 4px rgb(var(--shadow-color) / 0.05);
+    --shadow-md: 0 2px 4px rgb(var(--shadow-color) / 0.1), 0 8px 16px rgb(var(--shadow-color) / 0.2);
+    --shadow-bs: 0 2px 4px rgb(var(--shadow-color) / 0.1), 0 6px 14px rgb(var(--shadow-color) / 0.2);
+    --shadow-lg: 0 4px 8px rgb(var(--shadow-color) / 0.1), 0 12px 24px rgb(var(--shadow-color) / 0.2);
+    --shadow-xl: 0 8px 16px rgb(var(--shadow-color) / 0.1), 0 20px 36px rgb(var(--shadow-color) / 0.2);
+    --shadow-2xl: 0 12px 24px rgb(var(--shadow-color) / 0.1), 0 28px 48px rgb(var(--shadow-color) / 0.2);
+    --shadow-3xl: 0 16px 32px rgb(var(--shadow-color) / 0.1), 0 36px 64px rgb(var(--shadow-color) / 0.2);
+  }
+
+  [data-mode='dark'] {
+    color-scheme: dark;
+    --white-fixed: #FFFFFF;
+    --black-fixed: #18181B;
+    --bg: oklch(0.16 0.003 140);
+    --bg-surface: oklch(0.2 0.002 140);
+    --bg-panel: oklch(0.22 0.003 140);
+    --bg-button: oklch(0.94 0.003 140);
+    --bg-button-hover: oklch(0.88 0.003 140);
+    --bg-button-active: oklch(0.80 0.003 140);
+    --bg-button-secondary: oklch(0.54 0.01 140);
+    --bg-button-secondary-hover: oklch(0.60 0.01 140);
+    --bg-button-secondary-active: oklch(0.48 0.01 140);
+    --bg-input: oklch(0.20 0.002 140);
+    --state-hover: oklch(0 0 0 / .15);
+    --state-selected: oklch(0 0 0 / .3);
+    --border: oklch(0.4 0.002 140);
+    --border-strong: oklch(0.5 0.002 140);
+    --border-subtle: oklch(0.3 0.002 140);
+    --text-primary: oklch(0.98 0 140);
+    --text-secondary: oklch(0.55 0 140);
+    --text-muted: oklch(0.35 0 140);
+    --text-inverse: oklch(0.16 0.003 140);
+    --theme-color: oklch(0.50 0.750 130);
+    --theme-color-up: oklch(0.75 0.750 130);
+    --theme-color-down: oklch(0.40 0.750 130);
+    /* .themed:hover/.link:hover and .themed.selected read these two, which no layer defines. */
+    --theme-color-sub: var(--theme-color-down);
+    --theme-color-alt: var(--theme-color-up);
+    --success: #22C55E;
+    --success-hover: #34D399;
+    --warning: #FFD000;
+    --warning-hover: #FCD34D;
+    --danger: #EF4444;
+    --danger-hover: #F87171;
+    --info: #60A5FA;
+    --info-hover: #93C5FD;
+    --ring: rgba(255, 208, 0, 0.45);
+    --shadow-color: 0 0 0;
+    --shadow-rim: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --shadow-xs: 0 1px 2px rgb(var(--shadow-color) / 0.3);
+    --shadow-sm: 0 1px 2px rgb(var(--shadow-color) / 0.25), 0 2px 4px rgb(var(--shadow-color) / 0.2);
+    --shadow-md: 0 2px 4px rgb(var(--shadow-color) / 0.2), 0 8px 16px rgb(var(--shadow-color) / 0.25);
+    --shadow-bs: 0 2px 4px rgb(var(--shadow-color) / 0.2), 0 6px 14px rgb(var(--shadow-color) / 0.25);
+    --shadow-lg: 0 4px 8px rgb(var(--shadow-color) / 0.25), 0 12px 24px rgb(var(--shadow-color) / 0.3);
+    --shadow-xl: 0 8px 16px rgb(var(--shadow-color) / 0.3), 0 20px 36px rgb(var(--shadow-color) / 0.35);
+    --shadow-2xl: 0 12px 24px rgb(var(--shadow-color) / 0.35), 0 28px 48px rgb(var(--shadow-color) / 0.4);
+    --shadow-3xl: 0 16px 32px rgb(var(--shadow-color) / 0.4), 0 36px 64px rgb(var(--shadow-color) / 0.45);
+  }
+}
+
+.bg-main, .bg { background-color: var(--bg); }
+.bg-surface { background-color: var(--bg-surface); }
+.bg-panel { background-color: var(--bg-panel); }
+.state-hover { background-color: var(--state-hover); }
+.state-selected { background-color: var(--state-selected); }
+.bg-input { background-color: var(--bg-input); }
+.bg-button { background-color: var(--bg-button) ; }
+.bg-button-secondary { background-color: var(--bg-button-secondary) ; }
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-inverse { color: var(--text-inverse); }
+.text-white { color: var(--white-fixed); }
+.text-black { color: var(--black-fixed); }
+.text-theme { color: var(--theme-color); }
+.text-theme-up { color: var(--theme-color-up); }
+.text-theme-down { color: var(--theme-color-down); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-danger { color: var(--danger); }
+.text-info { color: var(--info); }
+
+.bg-success { background-color: var(--success); transition: background var(--motionout2); }
+.bg-success:hover { background-color: var(--success-hover); }
+.bg-warning { background-color: var(--warning); transition: background var(--motionout2); }
+.bg-warning:hover { background-color: var(--warning-hover); }
+.bg-danger { background-color: var(--danger); transition: background var(--motionout2); }
+.bg-danger:hover { background-color: var(--danger-hover); }
+.bg-info { background-color: var(--info); transition: background var(--motionout2); }
+.bg-info:hover { background-color: var(--info-hover); }

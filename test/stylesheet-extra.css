@@ -1,0 +1,4 @@
+/* The second half of test/stylesheet.css's `@import`, which the loader inlines. */
+.tag {
+	background-color: var(--theme);
+}

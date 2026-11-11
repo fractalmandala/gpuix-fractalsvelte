@@ -1,0 +1,24 @@
+/* Breakpoint tokens are reference values — CSS media queries cannot consume
+   custom properties, so the bands below are written as literals to match. */
+:root {
+	--bp-sm: 769px;
+	--bp-md: 1025px;
+	--bp-lg: 1281px;
+	--bp-xl: 1441px;
+}
+
+/* Visibility by breakpoint band. */
+.md-only, .lg-only, .xl-only { display: none; }
+
+@media (min-width: 1025px) {
+	.md-only { display: revert; }
+	.md-hide { display: none; }
+}
+@media (min-width: 1281px) {
+	.lg-only { display: revert; }
+	.lg-hide { display: none; }
+}
+@media (min-width: 1441px) {
+	.xl-only { display: revert; }
+	.xl-hide { display: none; }
+}
