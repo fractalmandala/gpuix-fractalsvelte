@@ -25,7 +25,7 @@ bun  --conditions custom-renderer --conditions development --preload @fractaldes
 - `app.ts` — the entry: `render_hot` opens the window and remounts `App.svelte` on every save.
 - `App.svelte` — the component. Styling is a `<style>` block of class rules plus
   [fractalstyler](https://www.npmjs.com/package/@fractaldesign/fractalstyler)'s classes from
-  `styles/`; see [docs/styling.md](https://github.com/khromov/gpuix-svelte/blob/main/docs/styling.md)
+  `styles/`; see [docs/styling.md](https://github.com/fractalmandala/gpuix-fractalsvelte/blob/main/docs/styling.md)
   for what CSS reaches GPUI and [styles/README.md](styles/README.md) for the copies.
 - `styles/` — the design system's layers, imported by `App.svelte` as `./styles/index.css`. The
   import registers every class and tag rule app-wide and applies the `:root` tokens; each
@@ -45,7 +45,7 @@ bun  --conditions custom-renderer --conditions development --preload @fractaldes
   and with the repository named it fills in the `update` line of `standalone.ts`; otherwise
   uncomment that line yourself. The app then checks that manifest through `check_for_update()`
   from `@fractaldesign/gpuix-fractalsvelte/update` (`App.svelte` shows the banner). See
-  [docs/updating.md](https://github.com/khromov/gpuix-svelte/blob/main/docs/updating.md).
+  [docs/updating.md](https://github.com/fractalmandala/gpuix-fractalsvelte/blob/main/docs/updating.md).
 - `test.ts` — a headless test through `@fractaldesign/gpuix-fractalsvelte/test`; plain script, exits 1 on failure.
   Runs on macOS and Windows, where the headless renderer is built.
 - `svelte.d.ts` — declares `*.svelte` and `*.css` modules for `tsc`.

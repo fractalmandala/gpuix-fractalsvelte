@@ -4,7 +4,7 @@ Write desktop apps in Svelte and render them into a native, GPU-accelerated wind
 gpuix-fractalsvelte is a Svelte custom renderer for [GPUI](https://www.gpui.rs/), the UI framework behind
 the Zed editor. It talks to GPUI through [`@gpuix/native`](https://www.npmjs.com/package/@gpuix/native).
 
-![Four gpuix-fractalsvelte demos running as native macOS windows](https://raw.githubusercontent.com/khromov/gpuix-svelte/main/.github/resources/demos.png)
+![Four gpuix-fractalsvelte demos running as native macOS windows](https://raw.githubusercontent.com/fractalmandala/gpuix-fractalsvelte/main/.github/resources/demos.png)
 
 > [!WARNING]
 > **Experimental.** gpuix-fractalsvelte is built on Svelte's unreleased
@@ -23,7 +23,7 @@ npm start
 
 A counter opens in its own window. Edit `App.svelte`, save, and the window hot-reloads.
 
-![The starter app's window: a rounded dark card on a black background, the count 2, a green minus button and a green plus button, the hint "Edit App.svelte and save — the window hot-reloads." and a "Light mode" button.](https://raw.githubusercontent.com/khromov/gpuix-svelte/main/homepage/assets/shots/hot-before.png)
+![The starter app's window: a rounded dark card on a black background, the count 2, a green minus button and a green plus button, the hint "Edit App.svelte and save — the window hot-reloads." and a "Light mode" button.](https://raw.githubusercontent.com/fractalmandala/gpuix-fractalsvelte/main/homepage/assets/shots/hot-before.png)
 
 You need **Node.js 24 or later** or **Bun 1.4 or later**, on macOS (Apple Silicon), Windows (x64
 or arm64) or Linux (x64). The GPUI binary comes prebuilt from npm, so `npm install` is all the
@@ -155,7 +155,7 @@ processes, open SQLite databases and load native addons directly.
 | [Updating](docs/updating.md) | In-app updates from a static manifest, hash and signature checked, with a GitHub release workflow |
 
 For real code, the [examples](examples) are the best reference (see [Examples](#examples)). To try
-a component without installing anything, the [playground](https://gpuix-svelte.stanislav.garden/playground.html)
+a component without installing anything, the [playground](https://fractalmandala.github.io/gpuix-fractalsvelte/playground.html)
 compiles one in the browser and runs it on GPUI's WebAssembly build or in the DOM, with the
 element tree, the mutations and the compiled JavaScript beside it.
 

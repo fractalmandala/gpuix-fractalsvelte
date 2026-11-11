@@ -12,6 +12,6 @@ render(TicTacToe, {
 		name: 'Tic-tac-toe',
 		identifier: 'dev.gpuix.svelte.tictactoe',
 		// Every gpuix-fractalsvelte release uploads this app for each platform and this manifest with it.
-		update: { manifest: 'https://github.com/khromov/gpuix-svelte/releases/latest/download/update.json' }
+		update: { manifest: 'https://github.com/fractalmandala/gpuix-fractalsvelte/releases/latest/download/update.json' }
 	}
 });

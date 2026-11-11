@@ -20,10 +20,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/khromov/gpuix-svelte.git",
+		"url": "git+https://github.com/fractalmandala/gpuix-fractalsvelte.git",
 		"directory": "packages/create-gpuix-fractalsvelte"
 	},
-	"homepage": "https://github.com/khromov/gpuix-svelte#readme",
+	"homepage": "https://github.com/fractalmandala/gpuix-fractalsvelte#readme",
 	"keywords": [
 		"svelte",
 		"gpui",
@@ -37,5 +37,8 @@
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org/",
 		"access": "public"
+	},
+	"bugs": {
+		"url": "https://github.com/fractalmandala/gpuix-fractalsvelte/issues"
 	}
 }

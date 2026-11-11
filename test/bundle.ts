@@ -154,7 +154,7 @@ check(
 		{
 			name: 'Tic-tac-toe',
 			identifier: 'dev.gpuix.svelte.tictactoe',
-			update: { manifest: 'https://github.com/khromov/gpuix-svelte/releases/latest/download/update.json' },
+			update: { manifest: 'https://github.com/fractalmandala/gpuix-fractalsvelte/releases/latest/download/update.json' },
 			title: 'GPUIX + Svelte — Tic-tac-toe'
 		},
 		{ identifier: 'com.example.gpuix-fractalsvelte-starter', title: 'gpuix-fractalsvelte starter' }

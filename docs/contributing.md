@@ -12,7 +12,7 @@ the `bun:` twins included. `@gpuix/native` comes prebuilt from npm, and Svelte c
 `vendor/svelte-<version>-<sha>.tgz`, a build of the unreleased custom-renderer PR.
 
 ```bash
-git clone https://github.com/khromov/gpuix-svelte
+git clone https://github.com/fractalmandala/gpuix-fractalsvelte
 cd gpuix-fractalsvelte
 nvm use
 bun install

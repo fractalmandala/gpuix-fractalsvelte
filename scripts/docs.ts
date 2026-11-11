@@ -20,9 +20,9 @@ import { build as vite_build } from 'vite';
 import { dom_plugins } from './vite-dom.ts';
 import { PLAYGROUND_BODY, PLAYGROUND_CSS, PLAYGROUND_ISOLATE, build_playground } from './playground.ts';
 
-const REPO = 'https://github.com/khromov/gpuix-svelte';
+const REPO = 'https://github.com/fractalmandala/gpuix-fractalsvelte';
 const RAW = REPO.replace('https://github.com/', 'https://raw.githubusercontent.com/');
-const SITE = 'https://gpuix-svelte.stanislav.garden/';
+const SITE = 'https://fractalmandala.github.io/gpuix-fractalsvelte/';
 const NPM = 'https://www.npmjs.com/package/@fractaldesign/gpuix-fractalsvelte';
 
 const PAGES = [
@@ -427,7 +427,7 @@ const head = ({ title, about, url, extra }: Head) => `<!doctype html>
 <meta name="twitter:image:alt" content="${OG_ALT}">
 <style>${CSS}</style>
 <script src="prism.js" defer></script>
-${extra}<script defer src="https://u.khromov.se/u.js" data-website-id="4acad772-f733-4a21-ba45-e25689155f2a"></script>
+${extra}
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>`;
@@ -447,7 +447,8 @@ ${CORNER}`;
 
 const FOOT = `<footer class="foot">
 <div class="wrap foot-inner">
-<p><b>gpuix-fractalsvelte</b> · MIT license · <a href="https://stanislav.garden">Stanislav Khromov</a></p>
+<p><b>gpuix-fractalsvelte</b> · MIT license · a fork of
+<a href="https://github.com/khromov/gpuix-svelte">gpuix-svelte</a> by <a href="https://stanislav.garden">Stanislav Khromov</a></p>
 <ul>
 <li><a href="index.html">Home</a></li>
 <li><a href="${REPO}">GitHub</a></li>

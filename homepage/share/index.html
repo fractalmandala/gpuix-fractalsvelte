@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Share cards · gpuix-svelte</title>
+<title>Share cards · gpuix-fractalsvelte</title>
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Cpath d='M28.4 18.3 15.4 32l13 13.7' fill='none' stroke='%23fff' stroke-width='4.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M34.9 18.3 50 32 34.9 45.7Z' fill='%23ff3e00' stroke='%23ff3e00' stroke-width='3.6' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -254,14 +254,16 @@ ul{list-style:none}
 .c-sheet .cell{grid-column:span 2;display:grid;grid-template-columns:72px 1fr;align-items:center;gap:0 8px;padding:0 28px;border-bottom:1px solid rgba(0,0,0,.28);font-size:40px;font-weight:500;letter-spacing:-.03em;line-height:1.1}
 .c-sheet .cell b{font:500 26px/1 var(--mono);letter-spacing:-.02em;color:#55554f}
 .c-sheet .cell em{font:500 26px/1 var(--mono);font-style:normal;letter-spacing:-.02em;color:#c22f00}
-.c-sheet .foot{grid-column:span 2;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-top:var(--rule);margin-top:-1px}
-.c-sheet .foot .cmd{font:500 31px/1 var(--mono);letter-spacing:-.035em}
-.c-sheet .foot .url{font:500 28px/1 var(--mono);letter-spacing:-.03em;color:#55554f}
+.c-sheet .foot{grid-column:span 2;display:flex;align-items:center;justify-content:space-between;gap:0 22px;padding:0 28px;border-top:var(--rule);margin-top:-1px}
+/* the scoped package name is longer than the upstream one, so this row is sized to hold all three */
+.c-sheet .foot .lockup{font-size:26px;gap:11px}
+.c-sheet .foot .cmd{font:500 24px/1 var(--mono);letter-spacing:-.035em}
+.c-sheet .foot .url{font:500 21px/1 var(--mono);letter-spacing:-.03em;color:#55554f}
 </style>
 </head>
 <body>
 <header class="top">
-<a class="home" href="../"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M27 13 9 32l18 19" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 13 57 32 36 51Z" fill="#ff3e00" stroke="#ff3e00" stroke-width="5" stroke-linejoin="round"/></svg>gpuix-svelte<span>share cards</span></a>
+<a class="home" href="../"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M27 13 9 32l18 19" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 13 57 32 36 51Z" fill="#ff3e00" stroke="#ff3e00" stroke-width="5" stroke-linejoin="round"/></svg>gpuix-fractalsvelte<span>share cards</span></a>
 <div class="controls">
 <select class="walls" id="walls" aria-label="Mac wallpaper" hidden></select>
 <div class="seg versions" id="versions" role="group" aria-label="Release"></div>
@@ -281,9 +283,9 @@ const RELEASES = [
 		previous: '0.4.1',
 		date: '5 Nov 2026',
 		lead: 'Built apps now update themselves',
-		install: 'npm i gpuix-svelte@0.5.0',
+		install: 'npm i @fractaldesign/gpuix-fractalsvelte@0.5.0',
 		wall: '../assets/wall/wall-mac-tahoe-dark.webp',
-		url: 'gpuix-svelte.stanislav.garden',
+		url: 'fractalmandala.github.io/gpuix-fractalsvelte',
 		facts: [
 			{ label: 'update checks', value: 'sha256, ed25519' },
 			{ label: 'release builds', value: '4 platforms' },
@@ -333,9 +335,9 @@ const RELEASES = [
 		previous: '0.3.0',
 		date: '31 Oct 2026',
 		lead: '`npm run build` now makes a real app',
-		install: 'npm i gpuix-svelte@0.4.0',
+		install: 'npm i @fractaldesign/gpuix-fractalsvelte@0.4.0',
 		wall: '../assets/wall/wall-mac.webp',
-		url: 'gpuix-svelte.stanislav.garden',
+		url: 'fractalmandala.github.io/gpuix-fractalsvelte',
 		facts: [
 			{ label: 'builds', value: '.app and .exe' },
 			{ label: 'windows picker stall', value: '2,000 → 17 ms' },
@@ -378,7 +380,7 @@ const wall = (r) => `<img class="wallpaper" src="${wallpaper ?? r.wall}" alt="">
 const COMMIT_TYPES = { new: 'feat:', perf: 'perf:', fix: 'fix:' };
 const fmt = (s) => s.replaceAll('<', '&lt;').replace(/`([^`]+)`/g, '<code>$1</code>');
 const mark = (body = '#fff', tip = '#ff3e00') => `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M27 13 9 32l18 19" fill="none" stroke="${body}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 13 57 32 36 51Z" fill="${tip}" stroke="${tip}" stroke-width="5" stroke-linejoin="round"/></svg>`;
-const lockup = (body, tip) => `<div class="lockup">${mark(body, tip)}gpuix-svelte</div>`;
+const lockup = (body, tip) => `<div class="lockup">${mark(body, tip)}gpuix-fractalsvelte</div>`;
 const chrome = (title) => `<div class="chrome"><i></i><i></i><i></i><span>${title}</span></div>`;
 
 const ICONS = {
@@ -487,7 +489,7 @@ const layouts = [
 		render: (r) => `
 			${wall(r)}<div class="scrim"></div>
 			<div class="win">
-				${chrome('gpuix-svelte')}
+				${chrome('gpuix-fractalsvelte')}
 				<div class="inner">
 					<div class="tile">${mark()}</div>
 					<h2>What’s new in ${r.version}</h2>
@@ -503,7 +505,7 @@ const layouts = [
 		note: 'Each feature gets a tile that draws it.',
 		render: (r) => `
 			<div class="t t-ver">
-				<div class="lockup">${mark('#000', '#000')}gpuix-svelte</div>
+				<div class="lockup">${mark('#000', '#000')}gpuix-fractalsvelte</div>
 				<div>
 					<p class="eyebrow">New release</p>
 					<div class="ver">${r.version}</div>
@@ -517,7 +519,7 @@ const layouts = [
 		name: '7 Poster',
 		note: 'Full accent flood, the log as one run of big type.',
 		render: (r) => `
-			<header><div class="lockup">${mark('#000', '#000')}gpuix-svelte</div><span>${r.date}</span></header>
+			<header><div class="lockup">${mark('#000', '#000')}gpuix-fractalsvelte</div><span>${r.date}</span></header>
 			<p class="run">${r.log.map((i, n, all) => `<span>${fmt(i.text)}${n < all.length - 1 ? '<i>/</i>' : ''}</span>`).join(' ')}</p>
 			<div class="big"><div class="ver">${r.version}</div><div class="out">is out</div></div>`
 	},
@@ -679,7 +681,7 @@ gallery.addEventListener('click', async (e) => {
 	button.textContent = 'Rendering…';
 	try {
 		const url = URL.createObjectURL(await card_png(frame.querySelector('.card')));
-		Object.assign(document.createElement('a'), { href: url, download: `gpuix-svelte-${release.version}-${frame.id}.png` }).click();
+		Object.assign(document.createElement('a'), { href: url, download: `gpuix-fractalsvelte-${release.version}-${frame.id}.png` }).click();
 		setTimeout(() => URL.revokeObjectURL(url), 10_000);
 		button.textContent = 'Download PNG';
 	} catch (error) {

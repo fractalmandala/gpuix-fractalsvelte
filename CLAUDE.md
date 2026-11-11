@@ -1380,7 +1380,7 @@ released version), and merging that PR tags, creates the GitHub release, runs `n
 `npm run consume` on macOS, then `npm run publish:npm` and `npm publish` in
 `packages/create-gpuix-fractalsvelte` on Linux with npm trusted publishing (OIDC, `id-token: write`;
 provenance is automatic). Each package has its own trusted publisher on npmjs.com:
-`khromov/gpuix-svelte`, workflow file `release.yml` — a fork publishing
+`fractalmandala/gpuix-fractalsvelte`, workflow file `release.yml` — a fork publishing
 `@fractaldesign/create-gpuix-fractalsvelte` needs one registered for that name and its own
 repository. release-please's `extra-files` keeps
 `packages/create-gpuix-fractalsvelte/package.json`'s version equal to the root's, and the scaffolder

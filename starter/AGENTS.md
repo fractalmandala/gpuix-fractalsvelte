@@ -6,7 +6,7 @@ GPU-accelerated UI framework behind the Zed editor. It runs on Node.js >= 24 or 
 ## Documentation
 
 GPUI's elements, styling and events follow their own rules, so read the docs before writing UI code.
-Fetch https://gpuix-svelte.stanislav.garden/llms.txt, then the pages it links for the task at hand.
+Fetch https://fractalmandala.github.io/gpuix-fractalsvelte/llms.txt, then the pages it links for the task at hand.
 
 ## Commands
 

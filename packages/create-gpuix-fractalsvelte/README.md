@@ -1,6 +1,6 @@
 # @fractaldesign/create-gpuix-fractalsvelte
 
-Scaffolds a [gpuix-fractalsvelte](https://github.com/khromov/gpuix-svelte) app styled with
+Scaffolds a [gpuix-fractalsvelte](https://github.com/fractalmandala/gpuix-fractalsvelte) app styled with
 [fractalstyler](https://www.npmjs.com/package/@fractaldesign/fractalstyler): Svelte components
 rendered into a native, GPU-accelerated desktop window through GPUI.
 
