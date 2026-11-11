@@ -12,6 +12,15 @@ the Zed editor. It talks to GPUI through [`@gpuix/native`](https://www.npmjs.com
 > exact Svelte build it was tested against (see [About the Svelte
 > version](#about-the-svelte-version)). Expect breaking changes between minor versions.
 
+- [gpuix-fractalsvelte](https://www.npmjs.com/package/@fractaldesign/gpuix-fractalsvelte)
+- [create-gpuix-fractalsvelte](https://www.npmjs.com/package/@fractaldesign/create-gpuix-fractalsvelte)
+
+## Create New App
+
+```bash
+npm create @fractaldesign/gpuix-fractalsvelte@latest my-app
+```
+
 ## Quick start
 
 ```bash
